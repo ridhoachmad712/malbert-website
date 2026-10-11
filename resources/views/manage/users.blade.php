@@ -1,0 +1,7 @@
+@extends('layouts.manage')
+@section('title', 'Pengguna')
+@section('content')
+<header class="manage-title"><span class="eyebrow">AKSES</span><h1>Pengguna website</h1><p>Buat akun penulis atau penerbit hanya untuk petugas yang ditunjuk sekolah.</p></header>
+<div class="panel"><h2>Akun tersedia</h2><div class="table-wrap"><table><thead><tr><th>Nama</th><th>Email</th><th>Peran</th></tr></thead><tbody>@foreach($users as $user)<tr><td><strong>{{ $user->name }}</strong></td><td>{{ $user->email }}</td><td>{{ ['admin'=>'Administrator','editor'=>'Penerbit','writer'=>'Penulis'][$user->role] ?? $user->role }}</td></tr>@endforeach</tbody></table></div></div>
+<form class="panel form-grid" method="post" action="{{ route('manage.users.store') }}">@csrf<h2 class="wide">Tambah pengguna</h2><label>Nama<input name="name" value="{{ old('name') }}" required></label><label>Email<input type="email" name="email" value="{{ old('email') }}" required></label><label>Peran<select name="role"><option value="writer">Penulis · mengajukan draf</option><option value="editor">Penerbit · meninjau dan menerbitkan</option><option value="admin">Administrator · seluruh pengaturan website</option></select></label><span></span><label>Kata sandi awal<input type="password" name="password" minlength="12" required autocomplete="new-password"></label><label>Ulangi kata sandi<input type="password" name="password_confirmation" minlength="12" required autocomplete="new-password"></label><div class="wide form-actions"><button class="button" type="submit">Buat akun</button></div></form>
+@endsection
