@@ -21,6 +21,14 @@ php artisan serve
 
 Buka alamat yang ditampilkan `artisan serve`. Panel pengelola berada di `/masuk`. Perintah `site:create-admin` meminta nama, email, dan kata sandi secara interaktif tanpa menampilkannya di terminal.
 
+Untuk mengisi pratinjau lokal dengan profil sekolah, guru, berita, pengumuman, galeri, dan ilustrasi fiktif, jalankan:
+
+```sh
+php artisan db:seed --class=DemoWebsiteSeeder
+```
+
+Seeder ini hanya berjalan di lingkungan lokal atau pengujian. Jika dijalankan lagi, data yang sudah ada tidak digandakan dan profil sekolah yang sudah disunting tidak ditimpa. Semua data contoh perlu diganti sebelum website diterbitkan.
+
 ## Isi dan peran
 
 Halaman publik meliputi beranda, profil sekolah, direktori dan profil guru, berita, pengumuman, galeri, dan kontak. Nama serta informasi sekolah diisi melalui panel pengelola. Profil guru baru tampil setelah persetujuan publikasi dicatat. Konten dimulai sebagai draf; penulis dapat mengirimnya untuk peninjauan, sedangkan editor atau admin dapat menerbitkan. Admin juga mengelola profil sekolah, guru, dan akun staf.

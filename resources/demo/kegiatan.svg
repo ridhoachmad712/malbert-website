@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Ilustrasi kegiatan bersama">
+  <rect width="800" height="500" fill="#eaf1ff"/>
+  <path d="M0 411c187-44 341-36 497-7 108 20 215 18 303-11v107H0Z" fill="#c8e6d2"/>
+  <circle cx="220" cy="178" r="64" fill="#ffda67"/>
+  <circle cx="405" cy="152" r="64" fill="#f1ba91"/>
+  <circle cx="588" cy="178" r="64" fill="#c89472"/>
+  <path d="M107 424V307c0-75 47-104 113-104s113 29 113 104v117Zm185 0V279c0-76 49-103 113-103s113 27 113 103v145Zm184 0V307c0-75 47-104 112-104s113 29 113 104v117Z" fill="#2759e5"/>
+  <path d="M292 424V279c0-76 49-103 113-103s113 27 113 103v145Z" fill="#24765d"/>
+  <path d="M218 397h374" stroke="#fff" stroke-width="10" stroke-linecap="round"/>
+</svg>

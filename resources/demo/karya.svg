@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 500" role="img" aria-label="Ilustrasi karya seni">
+  <rect width="800" height="500" fill="#fff3d9"/>
+  <circle cx="123" cy="105" r="68" fill="#ffda67"/>
+  <rect x="188" y="89" width="419" height="326" rx="19" fill="#fff" transform="rotate(-6 397 252)"/>
+  <rect x="216" y="104" width="419" height="326" rx="19" fill="#f7fbff" stroke="#2759e5" stroke-width="12"/>
+  <path d="m254 346 93-112 69 70 86-122 95 164Z" fill="#86c9a2"/>
+  <circle cx="321" cy="179" r="39" fill="#ffda67"/>
+  <path d="M585 391h104m-87 27h70" stroke="#e6b93a" stroke-width="15" stroke-linecap="round"/>
+  <path d="m122 269 26 37 46-52" fill="none" stroke="#2759e5" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

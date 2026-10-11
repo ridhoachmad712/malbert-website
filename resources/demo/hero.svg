@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" role="img" aria-label="Ilustrasi gedung sekolah">
+  <rect width="960" height="720" fill="#eaf1ff"/>
+  <circle cx="766" cy="144" r="78" fill="#ffda67"/>
+  <path d="M0 553C196 481 316 493 470 550s316 58 490-20v190H0Z" fill="#c8e6d2"/>
+  <path d="M0 630c202-71 393-65 561-20 155 42 266 28 399-18v128H0Z" fill="#8acaa6"/>
+  <rect x="204" y="252" width="554" height="355" rx="18" fill="#fff"/>
+  <path d="m169 282 312-170 311 170Z" fill="#2759e5"/>
+  <path d="M282 335h113v97H282zm282 0h113v97H564z" fill="#b8d8f4"/>
+  <path d="M282 335h113v97H282zm282 0h113v97H564z" fill="none" stroke="#2759e5" stroke-width="12"/>
+  <rect x="420" y="385" width="120" height="222" rx="9" fill="#172d4a"/>
+  <circle cx="520" cy="501" r="7" fill="#ffda67"/>
+  <path d="M131 598v-98m-28 31c0-42 56-43 56 0m-56 24c0-42 56-42 56 0m655 43v-98m-28 31c0-42 56-43 56 0m-56 24c0-42 56-42 56 0" fill="none" stroke="#24765d" stroke-width="20" stroke-linecap="round"/>
+  <path d="M373 210h215" stroke="#ffda67" stroke-width="14" stroke-linecap="round"/>
+</svg>
