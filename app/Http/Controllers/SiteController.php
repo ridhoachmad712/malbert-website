@@ -18,6 +18,9 @@ class SiteController extends Controller
             'announcements' => Post::public()->where('type', 'announcement')->latest('published_at')->take(2)->get(),
             'featured' => Post::public()->where('type', 'news')->where('is_featured', true)->latest('published_at')->first(),
             'news' => Post::public()->where('type', 'news')->latest('published_at')->take(3)->get(),
+            'events' => Post::public()->where('type', 'event')->whereDate('event_date', '>=', today())->orderBy('event_date')->take(3)->get(),
+            'programs' => Post::public()->where('type', 'program')->latest('published_at')->take(3)->get(),
+            'achievements' => Post::public()->where('type', 'achievement')->latest('published_at')->take(2)->get(),
             'teachers' => Teacher::where('is_published', true)->where('publication_approved', true)->orderBy('sort_order')->take(4)->get(),
         ]);
     }
@@ -60,9 +63,39 @@ class SiteController extends Controller
         return $this->listing('gallery', 'Galeri kegiatan');
     }
 
+    public function programs(): View
+    {
+        return $this->listing('program', 'Program sekolah');
+    }
+
+    public function facilities(): View
+    {
+        return $this->listing('facility', 'Fasilitas sekolah');
+    }
+
+    public function events(): View
+    {
+        return $this->listing('event', 'Agenda sekolah');
+    }
+
+    public function achievements(): View
+    {
+        return $this->listing('achievement', 'Prestasi');
+    }
+
+    public function admissions(): View
+    {
+        return view('site.admissions', ['school' => SchoolProfile::current()]);
+    }
+
+    public function faq(): View
+    {
+        return view('site.faq', ['school' => SchoolProfile::current(), 'questions' => Post::public()->where('type', 'faq')->orderBy('title')->get()]);
+    }
+
     public function post(string $type, Post $post): View
     {
-        $types = ['berita' => 'news', 'pengumuman' => 'announcement', 'galeri' => 'gallery'];
+        $types = ['berita' => 'news', 'pengumuman' => 'announcement', 'galeri' => 'gallery', 'program' => 'program', 'fasilitas' => 'facility', 'agenda' => 'event', 'prestasi' => 'achievement'];
         abort_unless($post->type === $types[$type] && $post->status === 'published' && $post->published_at?->isPast() && (! $post->expires_at || $post->expires_at->isFuture()), 404);
 
         return view('site.post', ['school' => SchoolProfile::current(), 'post' => $post, 'type' => $type]);
@@ -75,8 +108,8 @@ class SiteController extends Controller
 
     public function sitemap(): Response
     {
-        $urls = [route('home'), route('profile'), route('teachers'), route('news'), route('announcements'), route('gallery'), route('contact')];
-        foreach (Post::public()->get() as $post) {
+        $urls = [route('home'), route('profile'), route('teachers'), route('news'), route('announcements'), route('gallery'), route('programs'), route('facilities'), route('events'), route('achievements'), route('admissions'), route('faq'), route('contact')];
+        foreach (Post::public()->where('type', '!=', 'faq')->get() as $post) {
             $urls[] = $post->publicUrl();
         }
         foreach (Teacher::where('is_published', true)->where('publication_approved', true)->get() as $teacher) {
@@ -96,7 +129,7 @@ class SiteController extends Controller
     {
         return view('site.listing', [
             'school' => SchoolProfile::current(),
-            'posts' => Post::public()->where('type', $type)->latest('published_at')->paginate(9),
+            'posts' => Post::public()->where('type', $type)->when($type === 'event', fn ($query) => $query->orderBy('event_date'))->when($type !== 'event', fn ($query) => $query->latest('published_at'))->paginate(9),
             'title' => $title,
             'type' => $type,
         ]);

@@ -4,7 +4,7 @@
 <header class="manage-title"><a class="back-link" href="{{ route('manage.posts') }}">← Daftar konten</a><span class="eyebrow">PUBLIKASI</span><h1>{{ $post->exists ? 'Ubah konten' : 'Buat konten baru' }}</h1><p>{{ $post->exists ? 'Status: '.(['draft'=>'Draf','review'=>'Ditinjau','published'=>'Terbit','archived'=>'Arsip'][$post->status]) : 'Konten baru disimpan sebagai draf.' }}</p></header>
 @if($post->exists && $post->status === 'published' && auth()->user()->role === 'writer')<div class="notice">Konten yang sudah terbit hanya dapat diubah oleh penerbit.</div>@else
 <form class="panel form-grid" method="post" enctype="multipart/form-data" action="{{ $post->exists ? route('manage.posts.update', $post) : route('manage.posts.store') }}">@csrf @if($post->exists)@method('PUT')@endif
-<label>Jenis konten<select name="type" required><option value="news" @selected(old('type', $post->type) === 'news')>Berita</option><option value="announcement" @selected(old('type', $post->type) === 'announcement')>Pengumuman</option><option value="gallery" @selected(old('type', $post->type) === 'gallery')>Galeri</option></select></label>
+<label>Jenis konten<select name="type" required>@foreach(['news'=>'Berita','announcement'=>'Pengumuman','gallery'=>'Galeri','program'=>'Program','facility'=>'Fasilitas','event'=>'Agenda','achievement'=>'Prestasi','faq'=>'Tanya jawab'] as $value => $label)<option value="{{ $value }}" @selected(old('type', $post->type) === $value)>{{ $label }}</option>@endforeach</select><small>Untuk tanya jawab, isi judul sebagai pertanyaan dan isi konten sebagai jawaban. Terbitkan prestasi hanya setelah informasi diperiksa.</small></label>
 <label>Judul<input name="title" value="{{ old('title', $post->title) }}" maxlength="180" required></label>
 <label class="wide">Ringkasan singkat<textarea name="summary" rows="2" maxlength="450">{{ old('summary', $post->summary) }}</textarea></label>
 <label class="wide">Isi konten<textarea name="body" rows="12" required>{{ old('body', $post->body) }}</textarea><small>Teks biasa. Pisahkan paragraf dengan baris kosong.</small></label>
@@ -13,6 +13,8 @@
 <label>Lampiran PDF<input type="file" name="attachment" accept="application/pdf"><small>Maksimal 5 MB. Hanya unggah dokumen yang boleh diakses publik.</small></label>
 <label>Foto galeri<input type="file" name="gallery_images[]" accept="image/*" multiple><small>Opsional untuk jenis Galeri; maksimal 12 foto setiap unggahan.</small></label>
 <label>Berlaku sampai<input type="date" name="expires_at" value="{{ old('expires_at', $post->expires_at?->format('Y-m-d')) }}"><small>Opsional; terutama untuk pengumuman.</small></label>
+<label>Tanggal agenda<input type="date" name="event_date" value="{{ old('event_date', $post->event_date?->format('Y-m-d')) }}"><small>Wajib jika jenis konten Agenda.</small></label>
+<label>Lokasi agenda<input name="event_location" value="{{ old('event_location', $post->event_location) }}" maxlength="180"><small>Isi hanya jika tempat sudah ditetapkan.</small></label>
 <label class="check wide"><input type="checkbox" name="is_featured" value="1" @checked(old('is_featured', $post->is_featured))> Tampilkan sebagai berita pilihan di beranda</label>
 <div class="wide form-actions"><button class="button" type="submit">Simpan konten</button></div></form>@endif
 @if($post->exists)<p><a class="text-link" href="{{ route('manage.posts.preview', $post) }}" target="_blank" rel="noopener">Lihat pratinjau privat ↗</a></p>@endif

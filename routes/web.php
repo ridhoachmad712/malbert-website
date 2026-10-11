@@ -12,7 +12,13 @@ Route::get('/guru/{teacher:slug}', [SiteController::class, 'teacher'])->name('te
 Route::get('/berita', [SiteController::class, 'news'])->name('news');
 Route::get('/pengumuman', [SiteController::class, 'announcements'])->name('announcements');
 Route::get('/galeri', [SiteController::class, 'gallery'])->name('gallery');
-Route::get('/{type}/{post:slug}', [SiteController::class, 'post'])->whereIn('type', ['berita', 'pengumuman', 'galeri'])->name('post');
+Route::get('/program', [SiteController::class, 'programs'])->name('programs');
+Route::get('/fasilitas', [SiteController::class, 'facilities'])->name('facilities');
+Route::get('/agenda', [SiteController::class, 'events'])->name('events');
+Route::get('/prestasi', [SiteController::class, 'achievements'])->name('achievements');
+Route::get('/penerimaan', [SiteController::class, 'admissions'])->name('admissions');
+Route::get('/faq', [SiteController::class, 'faq'])->name('faq');
+Route::get('/{type}/{post:slug}', [SiteController::class, 'post'])->whereIn('type', ['berita', 'pengumuman', 'galeri', 'program', 'fasilitas', 'agenda', 'prestasi'])->name('post');
 Route::get('/kontak', [SiteController::class, 'contact'])->name('contact');
 Route::get('/sitemap.xml', [SiteController::class, 'sitemap'])->name('sitemap');
 Route::get('/robots.txt', [SiteController::class, 'robots'])->name('robots');

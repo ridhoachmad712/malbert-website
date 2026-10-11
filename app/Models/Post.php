@@ -10,7 +10,7 @@ class Post extends Model
 
     protected function casts(): array
     {
-        return ['is_featured' => 'boolean', 'gallery_paths' => 'array', 'published_at' => 'datetime', 'expires_at' => 'datetime'];
+        return ['is_featured' => 'boolean', 'gallery_paths' => 'array', 'published_at' => 'datetime', 'expires_at' => 'datetime', 'event_date' => 'date'];
     }
 
     public function scopePublic($query)
@@ -21,6 +21,10 @@ class Post extends Model
 
     public function publicUrl(): string
     {
-        return route('post', ['type' => ['news' => 'berita', 'announcement' => 'pengumuman', 'gallery' => 'galeri'][$this->type], 'post' => $this->slug]);
+        if ($this->type === 'faq') {
+            return route('faq');
+        }
+
+        return route('post', ['type' => ['news' => 'berita', 'announcement' => 'pengumuman', 'gallery' => 'galeri', 'program' => 'program', 'facility' => 'fasilitas', 'event' => 'agenda', 'achievement' => 'prestasi'][$this->type], 'post' => $this->slug]);
     }
 }

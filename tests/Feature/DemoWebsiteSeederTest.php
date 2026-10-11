@@ -23,7 +23,7 @@ class DemoWebsiteSeederTest extends TestCase
 
         $this->seed(DemoWebsiteSeeder::class);
         $this->assertSame(6, Teacher::count());
-        $this->assertSame(10, Post::count());
+        $this->assertSame(16, Post::count());
         $this->assertSame($admin->id, Post::firstOrFail()->user_id);
         $this->assertTrue(Storage::disk('public')->exists('demo/hero.svg'));
         $this->get('/')->assertOk()->assertSee('SDI M Albert (Data Contoh)')->assertSee('Contoh: Pekan literasi');
@@ -34,7 +34,7 @@ class DemoWebsiteSeederTest extends TestCase
         $this->seed(DemoWebsiteSeeder::class);
 
         $this->assertSame(6, Teacher::count());
-        $this->assertSame(10, Post::count());
+        $this->assertSame(16, Post::count());
         $this->assertSame('Profil yang sudah disunting', SchoolProfile::current()->name);
         $this->assertSame(1, User::where('role', 'admin')->count());
     }

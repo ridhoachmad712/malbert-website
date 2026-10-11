@@ -41,7 +41,7 @@ class ManageController extends Controller
     {
         $this->authorizePost($request, $post);
 
-        return view('site.post', ['school' => SchoolProfile::current(), 'post' => $post, 'type' => ['news' => 'berita', 'announcement' => 'pengumuman', 'gallery' => 'galeri'][$post->type], 'preview' => true]);
+        return view('site.post', ['school' => SchoolProfile::current(), 'post' => $post, 'type' => ['news' => 'berita', 'announcement' => 'pengumuman', 'gallery' => 'galeri', 'program' => 'program', 'facility' => 'fasilitas', 'event' => 'agenda', 'achievement' => 'prestasi', 'faq' => 'faq'][$post->type], 'preview' => true]);
     }
 
     public function storePost(Request $request): RedirectResponse
@@ -134,6 +134,10 @@ class ManageController extends Controller
             'email' => ['nullable', 'email', 'max:180'], 'phone' => ['nullable', 'string', 'max:80'],
             'hours' => ['nullable', 'string', 'max:180'], 'map_url' => ['nullable', 'url:http,https', 'max:500'],
             'aksikita_url' => ['nullable', 'url:https', 'max:500'],
+            'principal_name' => ['nullable', 'string', 'max:180'], 'principal_greeting' => ['nullable', 'string', 'max:5000'],
+            'admission_intro' => ['nullable', 'string', 'max:3000'], 'admission_requirements' => ['nullable', 'string', 'max:5000'],
+            'admission_steps' => ['nullable', 'string', 'max:5000'], 'admission_schedule' => ['nullable', 'string', 'max:3000'],
+            'admission_url' => ['nullable', 'url:http,https', 'max:500'],
             'logo' => ['nullable', 'image', 'max:2048'], 'hero' => ['nullable', 'image', 'max:4096'],
         ]);
         foreach (['logo', 'hero'] as $image) {
@@ -186,12 +190,13 @@ class ManageController extends Controller
     private function savePost(Request $request, Post $post): void
     {
         $data = $request->validate([
-            'type' => ['required', Rule::in(['news', 'announcement', 'gallery'])],
+            'type' => ['required', Rule::in(['news', 'announcement', 'gallery', 'program', 'facility', 'event', 'achievement', 'faq'])],
             'title' => ['required', 'string', 'max:180'], 'summary' => ['nullable', 'string', 'max:450'],
             'body' => ['required', 'string', 'max:30000'], 'cover' => ['nullable', 'image', 'max:4096'],
             'cover_alt' => ['nullable', 'string', 'max:250'], 'attachment' => ['nullable', 'mimes:pdf', 'max:5120'],
             'expires_at' => ['nullable', 'date', 'after:today'], 'is_featured' => ['nullable', 'boolean'],
             'gallery_images' => ['nullable', 'array', 'max:12'], 'gallery_images.*' => ['image', 'max:4096'],
+            'event_date' => ['required_if:type,event', 'nullable', 'date'], 'event_location' => ['nullable', 'string', 'max:180'],
         ]);
         if (! $post->exists) {
             $post->slug = Str::slug($data['title']).'-'.Str::lower(Str::random(6));
