@@ -10,6 +10,6 @@
 <div class="wide"><h2>Penerimaan murid</h2><p>Isi jadwal dan ketentuan setelah sekolah mengumumkannya secara resmi.</p></div>
 @foreach(['admission_intro'=>'Pengantar','admission_requirements'=>'Persyaratan','admission_steps'=>'Alur pendaftaran','admission_schedule'=>'Jadwal'] as $field => $label)<label class="wide">{{ $label }}<textarea name="{{ $field }}" rows="4">{{ old($field, $school->$field) }}</textarea></label>@endforeach
 <label class="wide">Tautan pendaftaran resmi<input type="url" name="admission_url" value="{{ old('admission_url', $school->admission_url) }}" maxlength="500"></label>
-<label>Logo sekolah<input type="file" name="logo" accept="image/*"><small>Maksimal 2 MB.</small></label><label>Foto utama beranda<input type="file" name="hero" accept="image/*"><small>Maksimal 4 MB; hanya foto yang boleh dipublikasikan.</small></label>
+<div class="wide"><p>Logo, gambar latar beranda, dan menu diatur pada <a class="text-link" href="{{ route('manage.appearance') }}">Tampilan website</a>.</p></div>
 <div class="wide form-actions"><button class="button" type="submit">Simpan profil sekolah</button></div></form>
 @endsection

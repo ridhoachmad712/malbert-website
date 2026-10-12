@@ -12,9 +12,21 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class ManageController extends Controller
 {
+    private const CONTENT_TYPES = [
+        'news' => ['label' => 'Berita', 'description' => 'Kabar dan liputan kegiatan sekolah.'],
+        'announcement' => ['label' => 'Pengumuman', 'description' => 'Informasi resmi dengan masa berlaku bila diperlukan.'],
+        'event' => ['label' => 'Agenda', 'description' => 'Kegiatan mendatang dengan tanggal dan lokasi.'],
+        'gallery' => ['label' => 'Galeri', 'description' => 'Kumpulan foto kegiatan sekolah.'],
+        'program' => ['label' => 'Program', 'description' => 'Penjelasan program pembelajaran dan kegiatan sekolah.'],
+        'facility' => ['label' => 'Fasilitas', 'description' => 'Informasi ruang dan sarana sekolah.'],
+        'achievement' => ['label' => 'Prestasi', 'description' => 'Capaian yang telah diperiksa sebelum diterbitkan.'],
+        'faq' => ['label' => 'Tanya jawab', 'description' => 'Pertanyaan umum beserta jawabannya.'],
+    ];
+
     public function dashboard(Request $request): View
     {
         return view('manage.dashboard', ['school' => SchoolProfile::current(), 'drafts' => Post::whereIn('status', ['draft', 'review'])->when($request->user()->role === 'writer', fn ($q) => $q->where('user_id', $request->user()->id))->latest()->take(8)->get(), 'postCount' => Post::count(), 'teacherCount' => Teacher::where('is_published', true)->count()]);
@@ -22,19 +34,33 @@ class ManageController extends Controller
 
     public function posts(Request $request): View
     {
-        return view('manage.posts', ['school' => SchoolProfile::current(), 'posts' => Post::when($request->user()->role === 'writer', fn ($q) => $q->where('user_id', $request->user()->id))->latest()->paginate(20)]);
+        return $this->postList($request);
     }
 
     public function newPost(): View
     {
-        return view('manage.post-form', ['school' => SchoolProfile::current(), 'post' => new Post]);
+        return view('manage.post-chooser', ['school' => SchoolProfile::current(), 'contentTypes' => self::CONTENT_TYPES]);
+    }
+
+    public function postsByType(Request $request, string $type): View
+    {
+        $this->contentType($type);
+
+        return $this->postList($request, $type);
+    }
+
+    public function newPostByType(string $type): View
+    {
+        $this->contentType($type);
+
+        return view('manage.post-form', ['school' => SchoolProfile::current(), 'post' => new Post(['type' => $type]), 'contentType' => self::CONTENT_TYPES[$type]]);
     }
 
     public function editPost(Request $request, Post $post): View
     {
         $this->authorizePost($request, $post);
 
-        return view('manage.post-form', ['school' => SchoolProfile::current(), 'post' => $post]);
+        return view('manage.post-form', ['school' => SchoolProfile::current(), 'post' => $post, 'contentType' => $this->contentType($post->type)]);
     }
 
     public function previewPost(Request $request, Post $post): View
@@ -44,12 +70,13 @@ class ManageController extends Controller
         return view('site.post', ['school' => SchoolProfile::current(), 'post' => $post, 'type' => ['news' => 'berita', 'announcement' => 'pengumuman', 'gallery' => 'galeri', 'program' => 'program', 'facility' => 'fasilitas', 'event' => 'agenda', 'achievement' => 'prestasi', 'faq' => 'faq'][$post->type], 'preview' => true]);
     }
 
-    public function storePost(Request $request): RedirectResponse
+    public function storePost(Request $request, string $type): RedirectResponse
     {
-        $post = new Post(['user_id' => $request->user()->id]);
+        $this->contentType($type);
+        $post = new Post(['user_id' => $request->user()->id, 'type' => $type]);
         $this->savePost($request, $post);
 
-        return redirect()->route('manage.posts')->with('success', 'Draf konten tersimpan.');
+        return redirect()->route('manage.posts.type', $type)->with('success', 'Draf '.$this->contentType($type)['label'].' tersimpan.');
     }
 
     public function updatePost(Request $request, Post $post): RedirectResponse
@@ -58,7 +85,7 @@ class ManageController extends Controller
         abort_if($request->user()->role === 'writer' && $post->status === 'published', 403);
         $this->savePost($request, $post);
 
-        return redirect()->route('manage.posts')->with('success', 'Konten diperbarui.');
+        return redirect()->route('manage.posts.type', $post->type)->with('success', 'Konten diperbarui.');
     }
 
     public function postStatus(Request $request, Post $post): RedirectResponse
@@ -120,6 +147,73 @@ class ManageController extends Controller
         $this->adminOnly();
 
         return view('manage.profile', ['school' => SchoolProfile::current()]);
+    }
+
+    public function editAppearance(): View
+    {
+        $this->adminOnly();
+
+        return view('manage.appearance', ['school' => SchoolProfile::current()]);
+    }
+
+    public function updateAppearance(Request $request): RedirectResponse
+    {
+        $this->adminOnly();
+        $rules = [
+            'logo' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:2048'],
+            'hero' => ['nullable', 'image', 'mimes:png,jpg,jpeg,webp', 'max:6144'],
+            'remove_logo' => ['nullable', 'boolean'],
+            'remove_hero' => ['nullable', 'boolean'],
+            'hero_title' => ['nullable', 'string', 'max:120'],
+            'hero_highlight' => ['nullable', 'string', 'max:120'],
+            'hero_description' => ['nullable', 'string', 'max:350'],
+            'hero_primary_label' => ['nullable', 'string', 'max:40'],
+            'hero_primary_route' => ['required', Rule::in(array_keys(SchoolProfile::HERO_LINKS))],
+            'hero_primary_enabled' => ['required', 'boolean'],
+            'hero_secondary_label' => ['nullable', 'string', 'max:40'],
+            'hero_secondary_route' => ['required', Rule::in(array_keys(SchoolProfile::HERO_LINKS))],
+            'hero_secondary_enabled' => ['required', 'boolean'],
+            'hero_image_position' => ['required', Rule::in(['left', 'center', 'right'])],
+            'hero_overlay' => ['required', Rule::in(['soft', 'normal', 'strong'])],
+            'navigation_more_label' => ['required', 'string', 'max:24'],
+            'navigation_items' => ['required', 'array'],
+        ];
+        foreach (array_keys(SchoolProfile::NAVIGATION_DEFAULTS) as $key) {
+            $rules["navigation_items.$key.label"] = ['required', 'string', 'max:32'];
+            $rules["navigation_items.$key.enabled"] = ['required', 'boolean'];
+            $rules["navigation_items.$key.location"] = ['required', Rule::in(['primary', 'more', 'cta'])];
+            $rules["navigation_items.$key.order"] = ['required', 'integer', 'min:0', 'max:999'];
+        }
+        $data = $request->validate($rules);
+
+        $navigation = [];
+        foreach (array_keys(SchoolProfile::NAVIGATION_DEFAULTS) as $key) {
+            $navigation[$key] = [
+                'label' => $data['navigation_items'][$key]['label'],
+                'enabled' => (bool) $data['navigation_items'][$key]['enabled'],
+                'location' => $data['navigation_items'][$key]['location'],
+                'order' => (int) $data['navigation_items'][$key]['order'],
+            ];
+        }
+        $primaryCount = collect($navigation)->filter(fn (array $item, string $key): bool => $item['enabled'] && $item['location'] === 'primary' && ($key !== 'aksikita' || SchoolProfile::current()->aksikita_url))->count();
+        $ctaCount = collect($navigation)->filter(fn (array $item): bool => $item['enabled'] && $item['location'] === 'cta')->count();
+        if ($primaryCount > 5 || $ctaCount > 1) {
+            throw ValidationException::withMessages(['navigation_items' => 'Maksimal lima menu utama dan satu tombol utama. Pindahkan sisanya ke menu Informasi.']);
+        }
+
+        $school = SchoolProfile::current();
+        foreach (['logo', 'hero'] as $image) {
+            if ($request->hasFile($image)) {
+                $data[$image.'_path'] = $request->file($image)->storePublicly('school', 'public');
+            } elseif ($request->boolean('remove_'.$image)) {
+                $data[$image.'_path'] = null;
+            }
+            unset($data[$image], $data['remove_'.$image]);
+        }
+        $data['navigation_items'] = $navigation;
+        $school->update($data);
+
+        return back()->with('success', 'Tampilan website diperbarui.');
     }
 
     public function updateProfile(Request $request): RedirectResponse
@@ -189,25 +283,46 @@ class ManageController extends Controller
 
     private function savePost(Request $request, Post $post): void
     {
-        $data = $request->validate([
-            'type' => ['required', Rule::in(['news', 'announcement', 'gallery', 'program', 'facility', 'event', 'achievement', 'faq'])],
-            'title' => ['required', 'string', 'max:180'], 'summary' => ['nullable', 'string', 'max:450'],
-            'body' => ['required', 'string', 'max:30000'], 'cover' => ['nullable', 'image', 'max:4096'],
-            'cover_alt' => ['nullable', 'string', 'max:250'], 'attachment' => ['nullable', 'mimes:pdf', 'max:5120'],
-            'expires_at' => ['nullable', 'date', 'after:today'], 'is_featured' => ['nullable', 'boolean'],
-            'gallery_images' => ['nullable', 'array', 'max:12'], 'gallery_images.*' => ['image', 'max:4096'],
-            'event_date' => ['required_if:type,event', 'nullable', 'date'], 'event_location' => ['nullable', 'string', 'max:180'],
-        ]);
+        $this->contentType($post->type);
+        $rules = [
+            'title' => ['required', 'string', 'max:180'],
+            'body' => ['required', 'string', 'max:30000'],
+        ];
+        if ($post->type !== 'faq') {
+            $rules['summary'] = ['nullable', 'string', 'max:450'];
+        }
+        if (in_array($post->type, ['news', 'gallery', 'program', 'facility', 'event', 'achievement'], true)) {
+            $rules['cover'] = ['nullable', 'image', 'max:4096'];
+            $rules['cover_alt'] = ['nullable', 'string', 'max:250'];
+        }
+        if (in_array($post->type, ['announcement', 'event'], true)) {
+            $rules['attachment'] = ['nullable', 'mimes:pdf', 'max:5120'];
+        }
+        if ($post->type === 'announcement') {
+            $rules['expires_at'] = ['nullable', 'date', 'after:today'];
+        }
+        if ($post->type === 'news') {
+            $rules['is_featured'] = ['nullable', 'boolean'];
+        }
+        if ($post->type === 'gallery') {
+            $rules['gallery_images'] = [$post->gallery_paths ? 'nullable' : 'required', 'array', 'max:12'];
+            $rules['gallery_images.*'] = ['image', 'max:4096'];
+        }
+        if ($post->type === 'event') {
+            $rules['event_date'] = ['required', 'date'];
+            $rules['event_location'] = ['nullable', 'string', 'max:180'];
+        }
+        $data = $request->validate($rules);
         if (! $post->exists) {
             $post->slug = Str::slug($data['title']).'-'.Str::lower(Str::random(6));
         }
         foreach (['cover', 'attachment'] as $file) {
-            if ($request->hasFile($file)) {
+            if (array_key_exists($file, $data) && $request->hasFile($file)) {
                 $post->{$file.'_path'} = $request->file($file)->storePublicly($file === 'cover' ? 'covers' : 'attachments', 'public');
             }
             unset($data[$file]);
         }
-        if ($request->hasFile('gallery_images')) {
+        if ($post->type === 'gallery' && $request->hasFile('gallery_images')) {
             $images = $post->gallery_paths ?? [];
             foreach ($request->file('gallery_images') as $image) {
                 $images[] = $image->storePublicly('gallery', 'public');
@@ -215,9 +330,30 @@ class ManageController extends Controller
             $post->gallery_paths = $images;
         }
         unset($data['gallery_images']);
-        $data['is_featured'] = $request->boolean('is_featured') && $data['type'] === 'news';
+        if ($post->type === 'news') {
+            $data['is_featured'] = $request->boolean('is_featured');
+        }
         $post->fill($data);
         $post->save();
+    }
+
+    private function postList(Request $request, ?string $type = null): View
+    {
+        return view('manage.posts', [
+            'school' => SchoolProfile::current(),
+            'posts' => Post::when($type, fn ($query) => $query->where('type', $type))
+                ->when($request->user()->role === 'writer', fn ($query) => $query->where('user_id', $request->user()->id))
+                ->latest()->paginate(20),
+            'type' => $type,
+            'contentTypes' => self::CONTENT_TYPES,
+        ]);
+    }
+
+    private function contentType(string $type): array
+    {
+        abort_unless(isset(self::CONTENT_TYPES[$type]), 404);
+
+        return self::CONTENT_TYPES[$type];
     }
 
     private function saveTeacher(Request $request, Teacher $teacher): void

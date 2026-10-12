@@ -31,7 +31,9 @@ Route::middleware('auth')->prefix('kelola')->name('manage.')->group(function ():
     Route::get('/', [ManageController::class, 'dashboard'])->name('dashboard');
     Route::get('/konten', [ManageController::class, 'posts'])->name('posts');
     Route::get('/konten/baru', [ManageController::class, 'newPost'])->name('posts.create');
-    Route::post('/konten', [ManageController::class, 'storePost'])->name('posts.store');
+    Route::get('/konten/jenis/{type}', [ManageController::class, 'postsByType'])->name('posts.type');
+    Route::get('/konten/jenis/{type}/baru', [ManageController::class, 'newPostByType'])->name('posts.create-type');
+    Route::post('/konten/jenis/{type}', [ManageController::class, 'storePost'])->name('posts.store');
     Route::get('/konten/{post}/ubah', [ManageController::class, 'editPost'])->name('posts.edit');
     Route::get('/konten/{post}/pratinjau', [ManageController::class, 'previewPost'])->name('posts.preview');
     Route::put('/konten/{post}', [ManageController::class, 'updatePost'])->name('posts.update');
@@ -43,6 +45,8 @@ Route::middleware('auth')->prefix('kelola')->name('manage.')->group(function ():
     Route::put('/guru/{teacher}', [ManageController::class, 'updateTeacher'])->name('teachers.update');
     Route::get('/profil', [ManageController::class, 'editProfile'])->name('profile');
     Route::put('/profil', [ManageController::class, 'updateProfile'])->name('profile.update');
+    Route::get('/tampilan', [ManageController::class, 'editAppearance'])->name('appearance');
+    Route::put('/tampilan', [ManageController::class, 'updateAppearance'])->name('appearance.update');
     Route::get('/pengguna', [ManageController::class, 'users'])->name('users');
     Route::post('/pengguna', [ManageController::class, 'storeUser'])->name('users.store');
     Route::get('/akun', [ManageController::class, 'account'])->name('account');

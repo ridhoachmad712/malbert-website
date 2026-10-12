@@ -37,8 +37,8 @@ class SchoolInformationTest extends TestCase
         $school = SchoolProfile::current();
         $school->update(['name' => 'Sekolah Pilihan Pengguna']);
 
-        $this->actingAs($admin)->post(route('manage.posts.store'), ['type' => 'event', 'title' => 'Agenda Baru', 'body' => 'Isi agenda'])->assertSessionHasErrors('event_date');
-        $this->actingAs($admin)->post(route('manage.posts.store'), ['type' => 'event', 'title' => 'Agenda Baru', 'body' => 'Isi agenda', 'event_date' => now()->addDay()->toDateString()])->assertRedirect(route('manage.posts'));
+        $this->actingAs($admin)->post(route('manage.posts.store', 'event'), ['title' => 'Agenda Baru', 'body' => 'Isi agenda'])->assertSessionHasErrors('event_date');
+        $this->actingAs($admin)->post(route('manage.posts.store', 'event'), ['title' => 'Agenda Baru', 'body' => 'Isi agenda', 'event_date' => now()->addDay()->toDateString()])->assertRedirect(route('manage.posts.type', 'event'));
         $this->assertSame(1, Post::where('type', 'event')->count());
 
         $this->actingAs($admin)->put(route('manage.profile.update'), [

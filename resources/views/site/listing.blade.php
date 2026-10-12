@@ -14,12 +14,12 @@
             <div><div class="card-grid">@foreach($posts as $post)<x-post-card :post="$post" />@endforeach</div>{{ $posts->links() }}</div>
             @if($posts->count() <= 2)
                 <aside class="listing-related" aria-label="Informasi lainnya">
-                    <span class="eyebrow">JELAJAHI JUGA</span>
-                    <h2>Informasi untuk keluarga</h2>
-                    <a href="{{ route('announcements') }}">Pengumuman <span aria-hidden="true">↗</span></a>
-                    <a href="{{ route('events') }}">Agenda sekolah <span aria-hidden="true">↗</span></a>
-                    <a href="{{ route('admissions') }}">Penerimaan murid <span aria-hidden="true">↗</span></a>
-                    <a href="{{ route('contact') }}">Kontak sekolah <span aria-hidden="true">↗</span></a>
+                    <span class="eyebrow">TAUTAN TERKAIT</span>
+                    <h2>Informasi lainnya</h2>
+                    <a href="{{ route('announcements') }}">Pengumuman</a>
+                    <a href="{{ route('events') }}">Agenda sekolah</a>
+                    <a href="{{ route('admissions') }}">Penerimaan murid</a>
+                    <a href="{{ route('contact') }}">Kontak sekolah</a>
                 </aside>
             @endif
         </div>

@@ -11,28 +11,35 @@
     @auth<meta name="robots" content="noindex" />@endauth
 </head>
 <body>
+@php
+    $visibleNavigation = collect($school->navigationItems())->filter(fn (array $item): bool => $item['enabled'] && ($item['key'] !== 'aksikita' || (bool) $school->aksikita_url));
+    $navigationByLocation = $visibleNavigation->groupBy('location');
+@endphp
 <a class="skip" href="#main">Lewati ke isi utama</a>
 <header class="site-header">
     <div class="container header-inner">
         <a class="brand" href="{{ route('home') }}" aria-label="Beranda {{ $school->name }}">
-            @if($school->logo_path)<img src="{{ asset('storage/'.$school->logo_path) }}" alt="" class="brand-logo">@else<span class="brand-mark" aria-hidden="true">✳</span>@endif
+            @if($school->logo_path)<img src="{{ asset('storage/'.$school->logo_path) }}" alt="" class="brand-logo">@else<span class="brand-mark" aria-hidden="true">SD</span>@endif
             <span><strong>{{ $school->name }}</strong><small>Website sekolah</small></span>
         </a>
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu <span aria-hidden="true">☰</span></button>
         <nav id="site-nav" class="site-nav" aria-label="Navigasi utama">
-            <a href="{{ route('home') }}" @class(['active' => request()->routeIs('home')])>Beranda</a>
-            <a href="{{ route('profile') }}" @class(['active' => request()->routeIs('profile')])>Profil</a>
-            <a href="{{ route('teachers') }}" @class(['active' => request()->routeIs('teachers', 'teacher')])>Guru</a>
-            <a href="{{ route('news') }}" @class(['active' => request()->routeIs('news')])>Berita</a>
-            <a href="{{ route('announcements') }}" @class(['active' => request()->routeIs('announcements')])>Pengumuman</a>
-            <a href="{{ route('admissions') }}" @class(['active' => request()->routeIs('admissions')])>Penerimaan</a>
-            <details class="nav-more"><summary>Jelajahi <span aria-hidden="true">⌄</span></summary><div>
-                <a href="{{ route('programs') }}">Program</a><a href="{{ route('facilities') }}">Fasilitas</a>
-                <a href="{{ route('events') }}">Agenda</a><a href="{{ route('achievements') }}">Prestasi</a>
-                <a href="{{ route('gallery') }}">Galeri</a><a href="{{ route('faq') }}">Tanya jawab</a>
-                <a href="{{ route('contact') }}">Kontak</a>
-            </div></details>
-            @if($school->aksikita_url)<a href="{{ $school->aksikita_url }}" target="_blank" rel="noopener">AksiKita ↗</a>@endif
+            @foreach($navigationByLocation->get('primary', collect()) as $item)
+                <a href="{{ $item['key'] === 'aksikita' ? $school->aksikita_url : route($item['key']) }}" @class(['active' => request()->routeIs($item['key']) || ($item['key'] === 'teachers' && request()->routeIs('teacher'))]) @if($item['key'] === 'aksikita')target="_blank" rel="noopener"@endif>{{ $item['label'] }}</a>
+            @endforeach
+            @if($navigationByLocation->has('more'))
+            <details @class(['nav-more', 'active' => $navigationByLocation->get('more')->contains(fn (array $item): bool => request()->routeIs($item['key']))])>
+                <summary>{{ $school->navigation_more_label ?: 'Informasi' }}</summary>
+                <div class="nav-more-panel">
+                    @foreach($navigationByLocation->get('more') as $item)
+                        <a href="{{ $item['key'] === 'aksikita' ? $school->aksikita_url : route($item['key']) }}" @class(['active' => request()->routeIs($item['key'])]) @if($item['key'] === 'aksikita')target="_blank" rel="noopener"@endif>{{ $item['label'] }}</a>
+                    @endforeach
+                </div>
+            </details>
+            @endif
+            @foreach($navigationByLocation->get('cta', collect()) as $item)
+                <a href="{{ $item['key'] === 'aksikita' ? $school->aksikita_url : route($item['key']) }}" @class(['nav-cta', 'active' => request()->routeIs($item['key'])]) @if($item['key'] === 'aksikita')target="_blank" rel="noopener"@endif>{{ $item['label'] }}</a>
+            @endforeach
         </nav>
     </div>
 </header>
@@ -40,7 +47,7 @@
 <footer class="site-footer">
     <div class="container footer-grid">
         <div><span class="eyebrow">{{ $school->name }}</span><p>{{ $school->tagline ?: 'Informasi sekolah yang mudah dijangkau.' }}</p></div>
-        <div><strong>Jelajahi</strong><a href="{{ route('profile') }}">Profil sekolah</a><a href="{{ route('programs') }}">Program & fasilitas</a><a href="{{ route('events') }}">Agenda</a><a href="{{ route('admissions') }}">Penerimaan murid</a><a href="{{ route('faq') }}">Tanya jawab</a></div>
+        <div><strong>Jelajahi</strong>@foreach(['profile', 'programs', 'facilities', 'events', 'admissions', 'faq'] as $key)@if($visibleNavigation->has($key))<a href="{{ route($key) }}">{{ $visibleNavigation[$key]['label'] }}</a>@endif @endforeach</div>
         <div><strong>Hubungi</strong><p>{{ $school->address ?: 'Alamat resmi belum dilengkapi.' }}</p>@if($school->email)<a href="mailto:{{ $school->email }}">{{ $school->email }}</a>@endif</div>
     </div>
     <div class="container footer-bottom"><small>© {{ date('Y') }} {{ $school->name }}</small><a href="{{ route('login') }}">Masuk pengelola</a></div>

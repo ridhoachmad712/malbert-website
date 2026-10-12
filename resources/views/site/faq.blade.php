@@ -8,6 +8,6 @@
     @empty
         <div class="empty"><strong>Pertanyaan belum ditambahkan.</strong><p>Silakan hubungi sekolah untuk memperoleh informasi yang Anda perlukan.</p></div>
     @endforelse
-    <p class="faq-contact"><a class="text-link" href="{{ route('contact') }}">Lihat kontak resmi sekolah ↗</a></p>
+    <p class="faq-contact"><a class="text-link" href="{{ route('contact') }}">Hubungi sekolah</a></p>
 </div>
 @endsection

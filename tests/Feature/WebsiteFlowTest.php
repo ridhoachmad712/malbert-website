@@ -6,6 +6,8 @@ use App\Models\Post;
 use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class WebsiteFlowTest extends TestCase
@@ -93,5 +95,66 @@ class WebsiteFlowTest extends TestCase
         $this->get(route('manage.posts.preview', $post))->assertRedirect(route('login'));
         $this->actingAs($writer)->get(route('manage.posts.preview', $post))->assertOk()->assertSee('Pratinjau privat');
         $this->actingAs($writer)->get(route('login'))->assertRedirect(route('manage.dashboard'));
+    }
+
+    public function test_each_content_type_has_its_own_creation_page_and_filtered_list(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)->get(route('manage.posts.create'))->assertOk()->assertSee('Pilih jenis konten');
+
+        foreach (['news', 'announcement', 'event', 'gallery', 'program', 'facility', 'achievement', 'faq'] as $type) {
+            $this->get(route('manage.posts.create-type', $type))->assertOk()->assertSee('name="title"', false);
+            $this->get(route('manage.posts.type', $type))->assertOk();
+        }
+
+        $this->get(route('manage.posts.create-type', 'unknown'))->assertNotFound();
+        $this->get(route('manage.posts.create-type', 'event'))->assertSee('name="event_date"', false)->assertDontSee('name="gallery_images[]"', false);
+        $this->get(route('manage.posts.create-type', 'gallery'))->assertSee('name="gallery_images[]"', false)->assertDontSee('name="event_date"', false);
+        $this->get(route('manage.posts.create-type', 'faq'))->assertDontSee('name="cover"', false)->assertDontSee('name="summary"', false);
+    }
+
+    public function test_content_type_comes_from_route_and_type_specific_fields_are_validated(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $this->actingAs($admin)->post(route('manage.posts.store', 'event'), [
+            'type' => 'news', 'title' => 'Rapat wali murid', 'body' => 'Rincian rapat.',
+        ])->assertSessionHasErrors('event_date');
+
+        $this->post(route('manage.posts.store', 'event'), [
+            'type' => 'news', 'title' => 'Rapat wali murid', 'body' => 'Rincian rapat.',
+            'event_date' => now()->addWeek()->toDateString(), 'is_featured' => '1',
+        ])->assertRedirect(route('manage.posts.type', 'event'));
+        $event = Post::firstOrFail();
+        $this->assertSame('event', $event->type);
+        $this->assertFalse($event->is_featured);
+
+        Storage::fake('public');
+        $this->post(route('manage.posts.store', 'faq'), [
+            'title' => 'Di mana sekolah?', 'body' => 'Lihat halaman kontak.',
+            'cover' => UploadedFile::fake()->image('abaikan.jpg'),
+        ])->assertRedirect(route('manage.posts.type', 'faq'));
+        $this->assertNull(Post::where('type', 'faq')->firstOrFail()->cover_path);
+
+        $this->post(route('manage.posts.store', 'gallery'), ['title' => 'Galeri kelas', 'body' => 'Suasana kelas.'])
+            ->assertSessionHasErrors('gallery_images');
+
+        $this->post(route('manage.posts.store', 'gallery'), [
+            'title' => 'Galeri kelas', 'body' => 'Suasana kelas.',
+            'gallery_images' => [UploadedFile::fake()->image('kelas.jpg')],
+        ])->assertRedirect(route('manage.posts.type', 'gallery'));
+        $this->assertCount(1, Post::where('type', 'gallery')->firstOrFail()->gallery_paths);
+    }
+
+    public function test_existing_content_keeps_its_type_when_edited(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $post = Post::create(['user_id' => $admin->id, 'type' => 'announcement', 'title' => 'Informasi lama', 'slug' => 'informasi-lama', 'body' => 'Isi lama', 'status' => 'draft']);
+
+        $this->actingAs($admin)->get(route('manage.posts.edit', $post))->assertOk()->assertSee('Isi pengumuman')->assertDontSee('name="type"', false);
+        $this->put(route('manage.posts.update', $post), ['type' => 'news', 'title' => 'Informasi baru', 'body' => 'Isi baru'])
+            ->assertRedirect(route('manage.posts.type', 'announcement'));
+        $this->assertSame('announcement', $post->fresh()->type);
+        $this->get(route('manage.posts.type', 'announcement'))->assertSee('Informasi baru');
+        $this->get(route('manage.posts.type', 'news'))->assertDontSee('Informasi baru');
     }
 }

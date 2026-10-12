@@ -40,7 +40,7 @@ class DemoWebsiteSeeder extends Seeder
                 'mission' => "Membangun kebiasaan membaca dan bertanya.\nMengajak anak belajar melalui pengalaman langsung.\nMenumbuhkan sikap saling menghargai dan bertanggung jawab.\nMelibatkan keluarga dalam perjalanan belajar.\n(Seluruh butir merupakan contoh.)",
                 'programs' => "Pojok baca dan berbagi cerita.\nProyek kebun sekolah.\nPekan karya dan seni.\nKegiatan kolaborasi bersama keluarga.\n(Data program contoh.)",
                 'facilities' => "Ruang belajar dan sudut baca.\nArea bermain dan kebun belajar.\nRuang kegiatan bersama.\n(Data fasilitas contoh; sesuaikan dengan kondisi sekolah.)",
-                'address' => 'Alamat sekolah belum diisi — data contoh',
+                'address' => 'Alamat sekolah belum diisi (data contoh)',
                 'hero_path' => 'demo/hero.svg',
             ]);
         }
