@@ -2,7 +2,7 @@
 @section('title', 'Tampilan website')
 @section('content')
 <header class="manage-title title-with-action">
-    <div><span class="eyebrow">SEKOLAH</span><h1>Tampilan website</h1><p>Atur identitas visual, beranda, dan menu yang terlihat oleh pengunjung.</p></div>
+    <div><span class="eyebrow">WEBSITE</span><h1>Susunan & tampilan</h1><p>Atur identitas visual dan susunan beranda. Menu dan tautan dikelola pada halaman tersendiri.</p></div>
     <a class="button outline" href="{{ route('home') }}" target="_blank" rel="noopener">Lihat beranda</a>
 </header>
 <form class="appearance-form" method="post" enctype="multipart/form-data" action="{{ route('manage.appearance.update') }}">
@@ -36,28 +36,41 @@
             <div class="wide appearance-subheading"><h3>Tombol pada hero</h3><p>Pilih tujuan dan tentukan tombol mana yang tampil.</p></div>
             <label class="check wide"><input type="hidden" name="hero_primary_enabled" value="0"><input type="checkbox" name="hero_primary_enabled" value="1" @checked(old('hero_primary_enabled', $school->hero_primary_enabled ?? true))> Tampilkan tombol utama</label>
             <label>Teks tombol utama<input name="hero_primary_label" value="{{ old('hero_primary_label', $school->hero_primary_label) }}" maxlength="40" placeholder="Informasi penerimaan"></label>
-            <label>Tujuan tombol utama<select name="hero_primary_route">@foreach(\App\Models\SchoolProfile::HERO_LINKS as $route => $label)<option value="{{ $route }}" @selected(old('hero_primary_route', $school->hero_primary_route ?: 'admissions') === $route)>{{ $label }}</option>@endforeach</select></label>
+            <label data-target-field="route">Tujuan tombol utama<select name="hero_primary_route">@foreach(\App\Models\SchoolProfile::HERO_LINKS as $route => $label)<option value="{{ $route }}" @selected(old('hero_primary_route', $school->hero_primary_route ?: 'admissions') === $route)>{{ $label }}</option>@endforeach</select></label>
+            <label>Jenis tujuan utama<select name="hero_primary_target_type" data-target-type>@foreach(['route'=>'Halaman bawaan','page'=>'Halaman buatan admin','external'=>'URL eksternal'] as $value => $label)<option value="{{ $value }}" @selected(old('hero_primary_target_type', $school->hero_primary_target_type ?: 'route') === $value)>{{ $label }}</option>@endforeach</select></label>
+            <label data-target-field="page">Halaman buatan admin<select name="hero_primary_page_id"><option value="">Pilih halaman terbit</option>@foreach(\App\Models\SitePage::where('is_published', true)->orderBy('title')->get() as $page)<option value="{{ $page->id }}" @selected((string) old('hero_primary_page_id', $school->hero_primary_page_id) === (string) $page->id)>{{ $page->title }}</option>@endforeach</select></label>
+            <label class="wide" data-target-field="external">URL eksternal<input name="hero_primary_external_url" type="url" value="{{ old('hero_primary_external_url', $school->hero_primary_external_url) }}" placeholder="https://contoh.sch.id" maxlength="500"></label>
             <label class="check wide"><input type="hidden" name="hero_secondary_enabled" value="0"><input type="checkbox" name="hero_secondary_enabled" value="1" @checked(old('hero_secondary_enabled', $school->hero_secondary_enabled ?? true))> Tampilkan tombol kedua</label>
             <label>Teks tombol kedua<input name="hero_secondary_label" value="{{ old('hero_secondary_label', $school->hero_secondary_label) }}" maxlength="40" placeholder="Profil sekolah"></label>
-            <label>Tujuan tombol kedua<select name="hero_secondary_route">@foreach(\App\Models\SchoolProfile::HERO_LINKS as $route => $label)<option value="{{ $route }}" @selected(old('hero_secondary_route', $school->hero_secondary_route ?: 'profile') === $route)>{{ $label }}</option>@endforeach</select></label>
+            <label data-target-field="route">Tujuan tombol kedua<select name="hero_secondary_route">@foreach(\App\Models\SchoolProfile::HERO_LINKS as $route => $label)<option value="{{ $route }}" @selected(old('hero_secondary_route', $school->hero_secondary_route ?: 'profile') === $route)>{{ $label }}</option>@endforeach</select></label>
+            <label>Jenis tujuan kedua<select name="hero_secondary_target_type" data-target-type>@foreach(['route'=>'Halaman bawaan','page'=>'Halaman buatan admin','external'=>'URL eksternal'] as $value => $label)<option value="{{ $value }}" @selected(old('hero_secondary_target_type', $school->hero_secondary_target_type ?: 'route') === $value)>{{ $label }}</option>@endforeach</select></label>
+            <label data-target-field="page">Halaman buatan admin<select name="hero_secondary_page_id"><option value="">Pilih halaman terbit</option>@foreach(\App\Models\SitePage::where('is_published', true)->orderBy('title')->get() as $page)<option value="{{ $page->id }}" @selected((string) old('hero_secondary_page_id', $school->hero_secondary_page_id) === (string) $page->id)>{{ $page->title }}</option>@endforeach</select></label>
+            <label class="wide" data-target-field="external">URL eksternal<input name="hero_secondary_external_url" type="url" value="{{ old('hero_secondary_external_url', $school->hero_secondary_external_url) }}" placeholder="https://contoh.sch.id" maxlength="500"></label>
         </div>
     </section>
 
-    <section class="panel appearance-panel" aria-labelledby="navigation-title">
-        <div class="appearance-heading"><span class="eyebrow">03 / NAVIGASI</span><h2 id="navigation-title">Menu pengunjung</h2><p>Ubah nama, tempat, dan urutan menu. Menu yang dimatikan hilang dari navigasi dan footer; halamannya tetap dapat dibuka melalui tautan langsung.</p></div>
-        <label class="appearance-more-label">Nama menu tambahan<input name="navigation_more_label" value="{{ old('navigation_more_label', $school->navigation_more_label ?: 'Informasi') }}" maxlength="24" required><small>Contoh: Informasi, Jelajahi, atau Lainnya.</small></label>
-        <div class="appearance-menu-head" aria-hidden="true"><span>Tampilkan</span><span>Nama menu</span><span>Letak</span><span>Urutan</span></div>
-        <div class="appearance-menu-list">
-            @foreach($school->navigationItems() as $key => $item)
-            <div class="appearance-menu-row">
-                <label class="appearance-menu-toggle"><input type="hidden" name="navigation_items[{{ $key }}][enabled]" value="0"><input type="checkbox" name="navigation_items[{{ $key }}][enabled]" value="1" @checked(old('navigation_items.'.$key.'.enabled', $item['enabled']))><span class="sr-only">Tampilkan {{ $item['label'] }}</span></label>
-                <label>Nama <span class="sr-only">{{ $item['label'] }}</span><input name="navigation_items[{{ $key }}][label]" value="{{ old('navigation_items.'.$key.'.label', $item['label']) }}" maxlength="32" required></label>
-                <label>Letak <span class="sr-only">{{ $item['label'] }}</span><select name="navigation_items[{{ $key }}][location]">@foreach(['primary'=>'Menu utama','more'=>'Menu tambahan','cta'=>'Tombol utama'] as $value => $label)<option value="{{ $value }}" @selected(old('navigation_items.'.$key.'.location', $item['location']) === $value)>{{ $label }}</option>@endforeach</select></label>
-                <label>Urutan <span class="sr-only">{{ $item['label'] }}</span><input type="number" name="navigation_items[{{ $key }}][order]" value="{{ old('navigation_items.'.$key.'.order', $item['order']) }}" min="0" max="999" required></label>
-            </div>
+    <section class="panel appearance-panel" aria-labelledby="section-settings-title">
+        <div class="appearance-heading"><span class="eyebrow">03 / SUSUNAN</span><h2 id="section-settings-title">Bagian beranda</h2><p>Pilih bagian yang tampil dan atur urutannya. Isi berita, agenda, program, dan guru tetap mengikuti konten yang diterbitkan.</p></div>
+        <div class="builder-section-list">
+            @foreach(\App\Models\SchoolProfile::HOME_SECTIONS as $key => $defaults)
+                @php($section = $school->homeSection($key))
+                <div class="builder-section-row"><strong>{{ $defaults['label'] }}</strong><label class="check"><input type="hidden" name="home_sections[{{ $key }}][enabled]" value="0"><input type="checkbox" name="home_sections[{{ $key }}][enabled]" value="1" @checked(old('home_sections.'.$key.'.enabled', $section['enabled']))> Tampilkan</label><label>Urutan<input type="number" name="home_sections[{{ $key }}][order]" value="{{ old('home_sections.'.$key.'.order', $section['order']) }}" min="0" max="999" required></label></div>
             @endforeach
         </div>
-        <p class="appearance-help">Maksimal lima menu utama dan satu tombol utama agar navigasi tetap rapi. Tautan AksiKita tampil jika URL-nya diisi pada profil sekolah.</p>
+    </section>
+
+    <section class="panel appearance-panel" aria-labelledby="theme-settings-title">
+        <div class="appearance-heading"><span class="eyebrow">04 / TEMA</span><h2 id="theme-settings-title">Warna dan bentuk</h2><p>Gunakan pilihan yang tersedia agar halaman tetap terbaca dan rapi di ponsel.</p></div>
+        <div class="appearance-fields">
+            <label>Warna utama<input type="color" name="theme_primary_color" value="{{ old('theme_primary_color', $school->theme_primary_color ?: '#2459d8') }}"></label>
+            <label>Warna aksen<input type="color" name="theme_accent_color" value="{{ old('theme_accent_color', $school->theme_accent_color ?: '#1b7661') }}"></label>
+            <label>Tipografi<select name="theme_font">@foreach(['jakarta'=>'Plus Jakarta Sans','system'=>'Huruf sistem','serif'=>'Serif'] as $value => $label)<option value="{{ $value }}" @selected(old('theme_font', $school->theme_font ?: 'jakarta') === $value)>{{ $label }}</option>@endforeach</select></label>
+            <label>Header<select name="header_style">@foreach(['standard'=>'Standar','compact'=>'Ringkas'] as $value => $label)<option value="{{ $value }}" @selected(old('header_style', $school->header_style ?: 'standard') === $value)>{{ $label }}</option>@endforeach</select></label>
+            <label>Bentuk kartu<select name="card_style">@foreach(['rounded'=>'Sudut lembut','square'=>'Sudut tegas'] as $value => $label)<option value="{{ $value }}" @selected(old('card_style', $school->card_style ?: 'rounded') === $value)>{{ $label }}</option>@endforeach</select></label>
+            <label>Ukuran hero<select name="hero_style">@foreach(['full'=>'Lapang','compact'=>'Ringkas'] as $value => $label)<option value="{{ $value }}" @selected(old('hero_style', $school->hero_style ?: 'full') === $value)>{{ $label }}</option>@endforeach</select></label>
+            <label class="wide">Nama menu tambahan<input name="navigation_more_label" value="{{ old('navigation_more_label', $school->navigation_more_label ?: 'Informasi') }}" maxlength="24" required></label>
+        </div>
+        <p class="appearance-help"><a href="{{ route('manage.menu') }}">Atur menu dan tautan</a> untuk mengganti isi navigasi dan tombol header.</p>
     </section>
 
     <div class="appearance-actions"><button class="button" type="submit">Simpan tampilan website</button></div>

@@ -275,3 +275,24 @@
     .home-hero-grid { padding-block: 66px 86px; }
     .home-hero-demo-note { right: 14px; left: 14px; text-align: center; }
 }
+
+.theme-font-system { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+.theme-font-serif { font-family: Georgia, "Times New Roman", serif; }
+.theme-font-serif .site-nav, .theme-font-serif .button, .theme-font-serif .eyebrow { font-family: system-ui, sans-serif; }
+.theme-header-compact .header-inner { min-height: 65px; }
+.theme-header-compact .brand-logo, .theme-header-compact .brand-mark { width: 36px; height: 36px; }
+.theme-card-square .story-card, .theme-card-square .teacher-card, .theme-card-square .home-program-feature, .theme-card-square .home-information, .theme-card-square .home-program-aside a { border-radius: 3px; }
+.hero-style-compact .home-hero-grid, .hero-style-compact.home-hero { min-height: 390px; }
+.hero-style-compact .home-hero-grid { padding-block: 50px; }
+.hero-style-compact .home-hero h1 { font-size: clamp(2.3rem, 4vw, 3.8rem); }
+.home-sections { display: flex; flex-direction: column; }
+.custom-page-standard .custom-page-body { max-width: 780px; }
+.custom-page-wide .custom-page-body { max-width: 1100px; }
+.custom-page-split .custom-page-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 42px; align-items: start; }
+.custom-page-image { width: 100%; max-height: 520px; object-fit: cover; border-radius: 12px; margin-bottom: 28px; }
+.custom-page-split .custom-page-image { margin-bottom: 0; }
+.custom-page .body-copy { white-space: pre-line; line-height: 1.9; }
+@media (max-width: 800px) {
+    .custom-page-split .custom-page-body { grid-template-columns: 1fr; gap: 22px; }
+    .hero-style-compact.home-hero, .hero-style-compact .home-hero-grid { min-height: 420px; }
+}

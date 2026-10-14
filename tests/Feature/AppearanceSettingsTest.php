@@ -13,91 +13,57 @@ class AppearanceSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_admin_can_change_hero_background_logo_and_public_navigation(): void
+    public function test_admin_can_change_hero_theme_and_home_sections(): void
     {
         Storage::fake('public');
         $admin = User::factory()->create(['role' => 'admin']);
-        $navigation = $this->navigationPayload();
-        $navigation['news']['enabled'] = '0';
-        $navigation['events']['location'] = 'primary';
-        $navigation['events']['label'] = 'Jadwal sekolah';
-        $navigation['events']['order'] = '15';
+        $this->actingAs($admin)->get(route('manage.appearance'))->assertOk()->assertSee('Bagian beranda');
+        $payload = $this->appearancePayload();
+        $payload['logo'] = UploadedFile::fake()->image('logo.png');
+        $payload['hero'] = UploadedFile::fake()->image('hero.jpg');
+        $payload['home_sections']['programs']['enabled'] = 0;
 
-        $this->actingAs($admin)->put(route('manage.appearance.update'), $this->appearancePayload($navigation) + [
-            'logo' => UploadedFile::fake()->image('logo.png'),
-            'hero' => UploadedFile::fake()->image('sekolah.jpg', 1600, 900),
-        ])->assertRedirect();
+        $this->actingAs($admin)->put(route('manage.appearance.update'), $payload)->assertRedirect()->assertSessionHasNoErrors();
 
         $school = SchoolProfile::current()->fresh();
-        $this->assertNotNull($school->logo_path);
-        $this->assertNotNull($school->hero_path);
-        Storage::disk('public')->assertExists([$school->logo_path, $school->hero_path]);
-
-        $home = $this->get(route('home'))->assertOk()->assertSee('Belajar bersama keluarga')->assertSee('hero-position-right');
-        $this->assertStringContainsString('class="home-hero-background"', $home->getContent());
-        $this->assertStringContainsString(asset('storage/'.$school->hero_path), $home->getContent());
-        preg_match('/<nav id="site-nav".*?<\/nav>/s', $home->getContent(), $matches);
-        $this->assertStringContainsString('Jadwal sekolah', $matches[0]);
-        $this->assertStringNotContainsString('href="'.route('news').'"', $matches[0]);
-        $this->assertLessThan(strpos($matches[0], 'Jadwal sekolah'), strpos($matches[0], 'Beranda'));
-        $this->get(route('profile'))->assertSee('Jadwal sekolah');
-
-        $hiddenHeroButton = $this->appearancePayload($navigation);
-        $hiddenHeroButton['hero_primary_enabled'] = '0';
-        $hiddenHeroButton['remove_logo'] = '1';
-        $hiddenHeroButton['remove_hero'] = '1';
-        $this->put(route('manage.appearance.update'), $hiddenHeroButton)->assertRedirect();
-        $this->assertNull($school->fresh()->logo_path);
-        $this->assertNull($school->fresh()->hero_path);
-        $this->get(route('home'))->assertDontSee('class="home-hero-background"', false)->assertDontSee('Lihat agenda');
+        Storage::disk('public')->assertExists($school->logo_path);
+        Storage::disk('public')->assertExists($school->hero_path);
+        $this->assertSame('external', $school->hero_primary_target_type);
+        $this->assertSame('https://pendaftaran.example.sch.id', $school->hero_primary_external_url);
+        $this->assertFalse($school->homeSection('programs')['enabled']);
+        $this->get('/')->assertOk()->assertSee('https://pendaftaran.example.sch.id')->assertSee('--blue:#123456', false)->assertDontSee('home-programs');
     }
 
-    public function test_only_admin_can_change_appearance_and_invalid_menu_layout_is_rejected(): void
+    public function test_only_admin_can_change_appearance_and_unsafe_external_url_is_rejected(): void
     {
         $writer = User::factory()->create(['role' => 'writer']);
         $this->actingAs($writer)->get(route('manage.appearance'))->assertForbidden();
-        $this->actingAs($writer)->put(route('manage.appearance.update'), [])->assertForbidden();
+        $this->actingAs($writer)->put(route('manage.appearance.update'), $this->appearancePayload())->assertForbidden();
 
         $admin = User::factory()->create(['role' => 'admin']);
-        $navigation = $this->navigationPayload();
-        $navigation['programs']['location'] = 'primary';
-        $navigation['facilities']['location'] = 'primary';
-        $this->actingAs($admin)->put(route('manage.appearance.update'), $this->appearancePayload($navigation))
-            ->assertSessionHasErrors('navigation_items');
-        $this->assertNull(SchoolProfile::current()->fresh()->navigation_items);
+        $payload = $this->appearancePayload();
+        $payload['hero_primary_external_url'] = 'javascript:alert(1)';
+        $this->actingAs($admin)->put(route('manage.appearance.update'), $payload)->assertSessionHasErrors('hero_primary_external_url');
+        $this->assertDatabaseMissing('school_profiles', ['hero_primary_external_url' => 'javascript:alert(1)']);
     }
 
-    private function navigationPayload(): array
+    private function appearancePayload(): array
     {
-        $items = [];
-        foreach (SchoolProfile::NAVIGATION_DEFAULTS as $key => $defaults) {
-            $items[$key] = [
-                'label' => $defaults['label'],
-                'enabled' => '1',
-                'location' => $defaults['location'],
-                'order' => (string) $defaults['order'],
-            ];
+        $sections = [];
+        foreach (SchoolProfile::HOME_SECTIONS as $key => $defaults) {
+            $sections[$key] = ['enabled' => 1, 'order' => $defaults['order']];
         }
 
-        return $items;
-    }
-
-    private function appearancePayload(array $navigation): array
-    {
         return [
-            'hero_title' => 'Belajar bersama keluarga',
-            'hero_highlight' => 'di sekolah kami.',
-            'hero_description' => 'Informasi kegiatan sekolah.',
-            'hero_primary_label' => 'Lihat agenda',
-            'hero_primary_route' => 'events',
-            'hero_primary_enabled' => '1',
-            'hero_secondary_label' => 'Profil kami',
-            'hero_secondary_route' => 'profile',
-            'hero_secondary_enabled' => '1',
-            'hero_image_position' => 'right',
-            'hero_overlay' => 'strong',
-            'navigation_more_label' => 'Jelajahi',
-            'navigation_items' => $navigation,
+            'hero_title' => 'Selamat datang', 'hero_highlight' => 'di sekolah kami',
+            'hero_description' => 'Informasi resmi sekolah.', 'hero_primary_label' => 'Daftar sekarang',
+            'hero_primary_target_type' => 'external', 'hero_primary_external_url' => 'https://pendaftaran.example.sch.id',
+            'hero_primary_enabled' => 1, 'hero_secondary_label' => 'Profil sekolah',
+            'hero_secondary_target_type' => 'route', 'hero_secondary_route' => 'profile', 'hero_secondary_enabled' => 1,
+            'hero_image_position' => 'right', 'hero_overlay' => 'strong',
+            'navigation_more_label' => 'Informasi', 'home_sections' => $sections,
+            'theme_primary_color' => '#123456', 'theme_accent_color' => '#24765d',
+            'theme_font' => 'system', 'header_style' => 'compact', 'card_style' => 'square', 'hero_style' => 'compact',
         ];
     }
 }

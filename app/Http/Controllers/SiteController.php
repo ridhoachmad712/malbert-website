@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use App\Models\SchoolProfile;
+use App\Models\SitePage;
 use App\Models\Teacher;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
@@ -113,6 +114,9 @@ class SiteController extends Controller
         }
         foreach (Teacher::where('is_published', true)->where('publication_approved', true)->get() as $teacher) {
             $urls[] = route('teacher', $teacher->slug);
+        }
+        foreach (SitePage::where('is_published', true)->get() as $page) {
+            $urls[] = route('site-page', $page->slug);
         }
         $entries = implode('', array_map(fn (string $url): string => '<url><loc>'.htmlspecialchars($url, ENT_XML1).'</loc></url>', $urls));
 

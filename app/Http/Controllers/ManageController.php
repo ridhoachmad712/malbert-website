@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 
 class ManageController extends Controller
 {
@@ -168,38 +167,33 @@ class ManageController extends Controller
             'hero_highlight' => ['nullable', 'string', 'max:120'],
             'hero_description' => ['nullable', 'string', 'max:350'],
             'hero_primary_label' => ['nullable', 'string', 'max:40'],
-            'hero_primary_route' => ['required', Rule::in(array_keys(SchoolProfile::HERO_LINKS))],
+            'hero_primary_route' => ['nullable', 'required_if:hero_primary_target_type,route', Rule::in(array_keys(SchoolProfile::HERO_LINKS))],
+            'hero_primary_target_type' => ['required', Rule::in(['route', 'page', 'external'])],
+            'hero_primary_page_id' => ['nullable', 'required_if:hero_primary_target_type,page', Rule::exists('site_pages', 'id')->where('is_published', true)],
+            'hero_primary_external_url' => ['nullable', 'required_if:hero_primary_target_type,external', 'url:https', 'max:500'],
             'hero_primary_enabled' => ['required', 'boolean'],
             'hero_secondary_label' => ['nullable', 'string', 'max:40'],
-            'hero_secondary_route' => ['required', Rule::in(array_keys(SchoolProfile::HERO_LINKS))],
+            'hero_secondary_route' => ['nullable', 'required_if:hero_secondary_target_type,route', Rule::in(array_keys(SchoolProfile::HERO_LINKS))],
+            'hero_secondary_target_type' => ['required', Rule::in(['route', 'page', 'external'])],
+            'hero_secondary_page_id' => ['nullable', 'required_if:hero_secondary_target_type,page', Rule::exists('site_pages', 'id')->where('is_published', true)],
+            'hero_secondary_external_url' => ['nullable', 'required_if:hero_secondary_target_type,external', 'url:https', 'max:500'],
             'hero_secondary_enabled' => ['required', 'boolean'],
             'hero_image_position' => ['required', Rule::in(['left', 'center', 'right'])],
             'hero_overlay' => ['required', Rule::in(['soft', 'normal', 'strong'])],
             'navigation_more_label' => ['required', 'string', 'max:24'],
-            'navigation_items' => ['required', 'array'],
+            'home_sections' => ['required', 'array'],
+            'theme_primary_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'theme_accent_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+            'theme_font' => ['required', Rule::in(['jakarta', 'system', 'serif'])],
+            'header_style' => ['required', Rule::in(['standard', 'compact'])],
+            'card_style' => ['required', Rule::in(['rounded', 'square'])],
+            'hero_style' => ['required', Rule::in(['full', 'compact'])],
         ];
-        foreach (array_keys(SchoolProfile::NAVIGATION_DEFAULTS) as $key) {
-            $rules["navigation_items.$key.label"] = ['required', 'string', 'max:32'];
-            $rules["navigation_items.$key.enabled"] = ['required', 'boolean'];
-            $rules["navigation_items.$key.location"] = ['required', Rule::in(['primary', 'more', 'cta'])];
-            $rules["navigation_items.$key.order"] = ['required', 'integer', 'min:0', 'max:999'];
+        foreach (array_keys(SchoolProfile::HOME_SECTIONS) as $key) {
+            $rules["home_sections.$key.enabled"] = ['required', 'boolean'];
+            $rules["home_sections.$key.order"] = ['required', 'integer', 'min:0', 'max:999'];
         }
         $data = $request->validate($rules);
-
-        $navigation = [];
-        foreach (array_keys(SchoolProfile::NAVIGATION_DEFAULTS) as $key) {
-            $navigation[$key] = [
-                'label' => $data['navigation_items'][$key]['label'],
-                'enabled' => (bool) $data['navigation_items'][$key]['enabled'],
-                'location' => $data['navigation_items'][$key]['location'],
-                'order' => (int) $data['navigation_items'][$key]['order'],
-            ];
-        }
-        $primaryCount = collect($navigation)->filter(fn (array $item, string $key): bool => $item['enabled'] && $item['location'] === 'primary' && ($key !== 'aksikita' || SchoolProfile::current()->aksikita_url))->count();
-        $ctaCount = collect($navigation)->filter(fn (array $item): bool => $item['enabled'] && $item['location'] === 'cta')->count();
-        if ($primaryCount > 5 || $ctaCount > 1) {
-            throw ValidationException::withMessages(['navigation_items' => 'Maksimal lima menu utama dan satu tombol utama. Pindahkan sisanya ke menu Informasi.']);
-        }
 
         $school = SchoolProfile::current();
         foreach (['logo', 'hero'] as $image) {
@@ -210,7 +204,21 @@ class ManageController extends Controller
             }
             unset($data[$image], $data['remove_'.$image]);
         }
-        $data['navigation_items'] = $navigation;
+        foreach (array_keys(SchoolProfile::HOME_SECTIONS) as $key) {
+            $data['home_sections'][$key] = [
+                'enabled' => (bool) $data['home_sections'][$key]['enabled'],
+                'order' => (int) $data['home_sections'][$key]['order'],
+            ];
+        }
+        foreach (['primary', 'secondary'] as $position) {
+            $type = $data['hero_'.$position.'_target_type'];
+            if ($type !== 'page') {
+                $data['hero_'.$position.'_page_id'] = null;
+            }
+            if ($type !== 'external') {
+                $data['hero_'.$position.'_external_url'] = null;
+            }
+        }
         $school->update($data);
 
         return back()->with('success', 'Tampilan website diperbarui.');

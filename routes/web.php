@@ -3,6 +3,8 @@
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\ManageController;
 use App\Http\Controllers\SiteController;
+use App\Http\Controllers\SiteMenuController;
+use App\Http\Controllers\SitePageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [SiteController::class, 'home'])->name('home');
@@ -18,6 +20,7 @@ Route::get('/agenda', [SiteController::class, 'events'])->name('events');
 Route::get('/prestasi', [SiteController::class, 'achievements'])->name('achievements');
 Route::get('/penerimaan', [SiteController::class, 'admissions'])->name('admissions');
 Route::get('/faq', [SiteController::class, 'faq'])->name('faq');
+Route::get('/halaman/{sitePage:slug}', [SitePageController::class, 'show'])->name('site-page');
 Route::get('/{type}/{post:slug}', [SiteController::class, 'post'])->whereIn('type', ['berita', 'pengumuman', 'galeri', 'program', 'fasilitas', 'agenda', 'prestasi'])->name('post');
 Route::get('/kontak', [SiteController::class, 'contact'])->name('contact');
 Route::get('/sitemap.xml', [SiteController::class, 'sitemap'])->name('sitemap');
@@ -47,6 +50,19 @@ Route::middleware('auth')->prefix('kelola')->name('manage.')->group(function ():
     Route::put('/profil', [ManageController::class, 'updateProfile'])->name('profile.update');
     Route::get('/tampilan', [ManageController::class, 'editAppearance'])->name('appearance');
     Route::put('/tampilan', [ManageController::class, 'updateAppearance'])->name('appearance.update');
+    Route::get('/halaman', [SitePageController::class, 'index'])->name('pages');
+    Route::get('/halaman/baru', [SitePageController::class, 'create'])->name('pages.create');
+    Route::post('/halaman', [SitePageController::class, 'store'])->name('pages.store');
+    Route::get('/halaman/{sitePage}/ubah', [SitePageController::class, 'edit'])->name('pages.edit');
+    Route::get('/halaman/{sitePage}/pratinjau', [SitePageController::class, 'preview'])->name('pages.preview');
+    Route::put('/halaman/{sitePage}', [SitePageController::class, 'update'])->name('pages.update');
+    Route::delete('/halaman/{sitePage}', [SitePageController::class, 'destroy'])->name('pages.destroy');
+    Route::get('/menu', [SiteMenuController::class, 'index'])->name('menu');
+    Route::get('/menu/baru', [SiteMenuController::class, 'create'])->name('menu.create');
+    Route::post('/menu', [SiteMenuController::class, 'store'])->name('menu.store');
+    Route::get('/menu/{siteMenuItem}/ubah', [SiteMenuController::class, 'edit'])->name('menu.edit');
+    Route::put('/menu/{siteMenuItem}', [SiteMenuController::class, 'update'])->name('menu.update');
+    Route::delete('/menu/{siteMenuItem}', [SiteMenuController::class, 'destroy'])->name('menu.destroy');
     Route::get('/pengguna', [ManageController::class, 'users'])->name('users');
     Route::post('/pengguna', [ManageController::class, 'storeUser'])->name('users.store');
     Route::get('/akun', [ManageController::class, 'account'])->name('account');

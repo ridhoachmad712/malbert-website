@@ -2,7 +2,7 @@
 @section('title', 'Beranda')
 @section('content')
 <div class="home-page">
-    <section class="home-hero hero-overlay-{{ $school->hero_overlay ?: 'normal' }}" aria-labelledby="hero-title">
+    <section class="home-hero hero-overlay-{{ $school->hero_overlay ?: 'normal' }} hero-style-{{ $school->hero_style ?: 'full' }}" aria-labelledby="hero-title">
         @if($school->hero_path)
             <div class="home-hero-background" aria-hidden="true"><img class="hero-position-{{ $school->hero_image_position ?: 'center' }}" src="{{ asset('storage/'.$school->hero_path) }}" alt="" fetchpriority="high"></div>
         @endif
@@ -12,8 +12,8 @@
                 <h1 id="hero-title">{{ $school->hero_title ?: 'Kabar sekolah,' }} <em>{{ $school->hero_highlight ?: 'dekat dengan keluarga.' }}</em></h1>
                 <p>{{ $school->hero_description ?: 'Temukan pengumuman, agenda, profil guru, dan informasi penerimaan murid dari sekolah.' }}</p>
                 <div class="home-hero-actions">
-                    @if($school->hero_primary_enabled ?? true)<a class="button" href="{{ route($school->hero_primary_route ?: 'admissions') }}">{{ $school->hero_primary_label ?: 'Informasi penerimaan' }}</a>@endif
-                    @if($school->hero_secondary_enabled ?? true)<a class="home-hero-secondary" href="{{ route($school->hero_secondary_route ?: 'profile') }}">{{ $school->hero_secondary_label ?: 'Profil sekolah' }}</a>@endif
+                    @if(($school->hero_primary_enabled ?? true) && $school->heroUrl('primary'))<a class="button" href="{{ $school->heroUrl('primary') }}" @if($school->hero_primary_target_type === 'external')target="_blank" rel="noopener noreferrer"@endif>{{ $school->hero_primary_label ?: 'Informasi penerimaan' }}</a>@endif
+                    @if(($school->hero_secondary_enabled ?? true) && $school->heroUrl('secondary'))<a class="home-hero-secondary" href="{{ $school->heroUrl('secondary') }}" @if($school->hero_secondary_target_type === 'external')target="_blank" rel="noopener noreferrer"@endif>{{ $school->hero_secondary_label ?: 'Profil sekolah' }}</a>@endif
                 </div>
             </div>
         </div>
@@ -21,13 +21,17 @@
     </section>
 
     <div class="container">
-        <nav class="home-shortcuts" aria-label="Akses informasi utama">
+        <div class="home-sections">
+        @if($school->homeSection('shortcuts')['enabled'])
+        <nav class="home-shortcuts" aria-label="Akses informasi utama" style="order: {{ $school->homeSection('shortcuts')['order'] }}">
             <a href="{{ route('announcements') }}"><small>Informasi resmi</small><strong>Pengumuman</strong></a>
             <a href="{{ route('events') }}"><small>Jadwal kegiatan</small><strong>Agenda sekolah</strong></a>
             <a href="{{ route('contact') }}"><small>Hubungi kami</small><strong>Kontak dan lokasi</strong></a>
         </nav>
+        @endif
 
-        <section class="home-section home-updates" aria-labelledby="updates-title">
+        @if($school->homeSection('updates')['enabled'])
+        <section class="home-section home-updates" aria-labelledby="updates-title" style="order: {{ $school->homeSection('updates')['order'] }}">
             <div class="section-heading"><div><span class="eyebrow">BERITA SEKOLAH</span><h2 id="updates-title">Kabar terbaru</h2></div><a class="text-link" href="{{ route('news') }}">Semua berita</a></div>
             <div class="home-updates-grid">
                 <div class="home-news">
@@ -57,8 +61,10 @@
                 </aside>
             </div>
         </section>
+        @endif
 
-        <section class="home-section home-programs" aria-labelledby="programs-title">
+        @if($school->homeSection('programs')['enabled'])
+        <section class="home-section home-programs" aria-labelledby="programs-title" style="order: {{ $school->homeSection('programs')['order'] }}">
             <div class="section-heading"><div><span class="eyebrow">KEGIATAN BELAJAR</span><h2 id="programs-title">Program dan lingkungan belajar</h2></div><a class="text-link" href="{{ route('programs') }}">Semua program</a></div>
             <div class="home-program-grid">
                 @if($programs->isNotEmpty())
@@ -78,18 +84,22 @@
                 </div>
             </div>
         </section>
+        @endif
 
-        @if($school->principal_greeting && $school->principal_name)
-            <section class="home-section home-principal" aria-labelledby="principal-title">
+        @if($school->homeSection('principal')['enabled'] && $school->principal_greeting && $school->principal_name)
+            <section class="home-section home-principal" aria-labelledby="principal-title" style="order: {{ $school->homeSection('principal')['order'] }}">
                 <div><span class="eyebrow">DARI KEPALA SEKOLAH</span><h2 id="principal-title">Sambutan kepala sekolah</h2><p>{{ Str::limit($school->principal_greeting, 300) }}</p><strong>{{ $school->principal_name }}</strong><a class="text-link" href="{{ route('profile') }}">Baca profil sekolah</a></div>
             </section>
         @endif
 
-        @if($teachers->isNotEmpty())
-            <section class="home-section home-teachers" aria-labelledby="teachers-title"><div class="section-heading"><div><span class="eyebrow">GURU DAN TENAGA KEPENDIDIKAN</span><h2 id="teachers-title">Orang-orang di sekolah</h2></div><a class="text-link" href="{{ route('teachers') }}">Semua profil guru</a></div><div class="teacher-grid">@foreach($teachers as $teacher)<x-teacher-card :teacher="$teacher" />@endforeach</div></section>
+        @if($school->homeSection('teachers')['enabled'] && $teachers->isNotEmpty())
+            <section class="home-section home-teachers" aria-labelledby="teachers-title" style="order: {{ $school->homeSection('teachers')['order'] }}"><div class="section-heading"><div><span class="eyebrow">GURU DAN TENAGA KEPENDIDIKAN</span><h2 id="teachers-title">Orang-orang di sekolah</h2></div><a class="text-link" href="{{ route('teachers') }}">Semua profil guru</a></div><div class="teacher-grid">@foreach($teachers as $teacher)<x-teacher-card :teacher="$teacher" />@endforeach</div></section>
         @endif
 
-        <section class="home-section contact-band"><div><span class="eyebrow">HUBUNGI SEKOLAH</span><h2>Alamat dan kontak</h2><p>{{ $school->address ?: 'Alamat resmi akan dilengkapi pengelola sekolah.' }}</p></div><a class="button button-light" href="{{ route('contact') }}">Lihat kontak sekolah</a></section>
+        @if($school->homeSection('contact')['enabled'])
+        <section class="home-section contact-band" style="order: {{ $school->homeSection('contact')['order'] }}"><div><span class="eyebrow">HUBUNGI SEKOLAH</span><h2>Alamat dan kontak</h2><p>{{ $school->address ?: 'Alamat resmi akan dilengkapi pengelola sekolah.' }}</p></div><a class="button button-light" href="{{ route('contact') }}">Lihat kontak sekolah</a></section>
+        @endif
+        </div>
     </div>
 </div>
 @endsection

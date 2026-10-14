@@ -221,3 +221,35 @@
     .appearance-fields .wide { grid-column: auto; }
     .appearance-hero-preview { height: 185px; }
 }
+
+.builder-list { max-width: 1080px; padding: 8px 24px; }
+.builder-list-row { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 17px 0; border-bottom: 1px solid var(--line); }
+.builder-list-row:last-child { border-bottom: 0; }
+.builder-list-row strong, .builder-list-row small { display: block; }
+.builder-list-row strong { color: var(--navy); font-size: .94rem; }
+.builder-list-row small { max-width: 650px; overflow-wrap: anywhere; color: var(--muted); font-size: .73rem; }
+.builder-list-actions, .builder-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+.builder-list-actions .button { min-height: 38px; }
+.builder-form { max-width: 1080px; padding: 32px; }
+.builder-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 20px; }
+.builder-grid .wide { grid-column: 1 / -1; }
+.builder-grid label { min-width: 0; }
+.builder-grid .check { align-self: center; }
+.builder-actions { justify-content: flex-end; margin-top: 25px; }
+.builder-delete { max-width: 1080px; margin-top: 18px; text-align: right; }
+.builder-delete button { padding: 9px 12px; border: 1px solid #d7a5a5; border-radius: 8px; background: #fff; color: #9e3030; font-size: .8rem; }
+.builder-image-preview img { max-width: 300px; max-height: 200px; object-fit: cover; border-radius: 8px; }
+.builder-section-list { display: grid; gap: 0; }
+.builder-section-row { display: grid; grid-template-columns: 1fr 150px 115px; gap: 20px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.builder-section-row strong { font-size: .83rem; }
+.builder-section-row label { margin: 0; font-size: .72rem; }
+.builder-section-row input[type=number] { margin-top: 4px; }
+[data-target-field][hidden] { display: none !important; }
+@media (max-width: 700px) {
+    .builder-list-row { align-items: flex-start; flex-direction: column; }
+    .builder-grid { grid-template-columns: 1fr; }
+    .builder-grid .wide { grid-column: auto; }
+    .builder-form { padding: 22px; }
+    .builder-section-row { grid-template-columns: 1fr 110px; gap: 8px; }
+    .builder-section-row strong { grid-column: 1 / -1; }
+}

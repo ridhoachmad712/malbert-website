@@ -38,3 +38,19 @@ document.querySelectorAll('.menu-toggle').forEach((button) => {
         }
     });
 });
+
+document.querySelectorAll('[data-target-type]').forEach((select) => {
+    const prefix = select.name.replace(/target_type$/, '');
+    const fields = [...select.form.querySelectorAll('[data-target-field]')].filter((label) =>
+        [...label.querySelectorAll('input, select')].some((input) => input.name.startsWith(prefix))
+    );
+    const update = () => {
+        fields.forEach((label) => {
+            const visible = label.dataset.targetField === select.value;
+            label.hidden = !visible;
+            label.querySelectorAll('input, select').forEach((input) => { input.disabled = !visible; });
+        });
+    };
+    select.addEventListener('change', update);
+    update();
+});

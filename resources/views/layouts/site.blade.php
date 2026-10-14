@@ -8,11 +8,12 @@
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
     <link rel="stylesheet" href="{{ asset('css/school.css') }}">
     <link rel="stylesheet" href="{{ asset('css/school-public.css') }}">
+    <style>:root{--blue:{{ $school->theme_primary_color ?: '#2459d8' }};--blue-deep:color-mix(in srgb,var(--blue) 76%,#061f48);--green:{{ $school->theme_accent_color ?: '#1b7661' }}}</style>
     @auth<meta name="robots" content="noindex" />@endauth
 </head>
-<body>
+<body class="theme-font-{{ $school->theme_font ?: 'jakarta' }} theme-header-{{ $school->header_style ?: 'standard' }} theme-card-{{ $school->card_style ?: 'rounded' }}">
 @php
-    $visibleNavigation = collect($school->navigationItems())->filter(fn (array $item): bool => $item['enabled'] && ($item['key'] !== 'aksikita' || (bool) $school->aksikita_url));
+    $visibleNavigation = \App\Models\SiteMenuItem::with('page')->where('is_enabled', true)->orderBy('sort_order')->get()->filter(fn ($item): bool => (bool) $item->url());
     $navigationByLocation = $visibleNavigation->groupBy('location');
 @endphp
 <a class="skip" href="#main">Lewati ke isi utama</a>
@@ -25,20 +26,20 @@
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu <span aria-hidden="true">☰</span></button>
         <nav id="site-nav" class="site-nav" aria-label="Navigasi utama">
             @foreach($navigationByLocation->get('primary', collect()) as $item)
-                <a href="{{ $item['key'] === 'aksikita' ? $school->aksikita_url : route($item['key']) }}" @class(['active' => request()->routeIs($item['key']) || ($item['key'] === 'teachers' && request()->routeIs('teacher'))]) @if($item['key'] === 'aksikita')target="_blank" rel="noopener"@endif>{{ $item['label'] }}</a>
+                <a href="{{ $item->url() }}" @class(['active' => $item->isActive()]) @if($item->open_new_tab)target="_blank" rel="noopener noreferrer"@endif>{{ $item->label }}</a>
             @endforeach
             @if($navigationByLocation->has('more'))
-            <details @class(['nav-more', 'active' => $navigationByLocation->get('more')->contains(fn (array $item): bool => request()->routeIs($item['key']))])>
+            <details @class(['nav-more', 'active' => $navigationByLocation->get('more')->contains(fn ($item): bool => $item->isActive())])>
                 <summary>{{ $school->navigation_more_label ?: 'Informasi' }}</summary>
                 <div class="nav-more-panel">
                     @foreach($navigationByLocation->get('more') as $item)
-                        <a href="{{ $item['key'] === 'aksikita' ? $school->aksikita_url : route($item['key']) }}" @class(['active' => request()->routeIs($item['key'])]) @if($item['key'] === 'aksikita')target="_blank" rel="noopener"@endif>{{ $item['label'] }}</a>
+                        <a href="{{ $item->url() }}" @class(['active' => $item->isActive()]) @if($item->open_new_tab)target="_blank" rel="noopener noreferrer"@endif>{{ $item->label }}</a>
                     @endforeach
                 </div>
             </details>
             @endif
             @foreach($navigationByLocation->get('cta', collect()) as $item)
-                <a href="{{ $item['key'] === 'aksikita' ? $school->aksikita_url : route($item['key']) }}" @class(['nav-cta', 'active' => request()->routeIs($item['key'])]) @if($item['key'] === 'aksikita')target="_blank" rel="noopener"@endif>{{ $item['label'] }}</a>
+                <a href="{{ $item->url() }}" @class(['nav-cta', 'active' => $item->isActive()]) @if($item->open_new_tab)target="_blank" rel="noopener noreferrer"@endif>{{ $item->label }}</a>
             @endforeach
         </nav>
     </div>
@@ -47,7 +48,7 @@
 <footer class="site-footer">
     <div class="container footer-grid">
         <div><span class="eyebrow">{{ $school->name }}</span><p>{{ $school->tagline ?: 'Informasi sekolah yang mudah dijangkau.' }}</p></div>
-        <div><strong>Jelajahi</strong>@foreach(['profile', 'programs', 'facilities', 'events', 'admissions', 'faq'] as $key)@if($visibleNavigation->has($key))<a href="{{ route($key) }}">{{ $visibleNavigation[$key]['label'] }}</a>@endif @endforeach</div>
+        <div><strong>Jelajahi</strong>@foreach($visibleNavigation->filter(fn ($item): bool => $item->show_in_footer)->take(8) as $item)<a href="{{ $item->url() }}" @if($item->open_new_tab)target="_blank" rel="noopener noreferrer"@endif>{{ $item->label }}</a>@endforeach</div>
         <div><strong>Hubungi</strong><p>{{ $school->address ?: 'Alamat resmi belum dilengkapi.' }}</p>@if($school->email)<a href="mailto:{{ $school->email }}">{{ $school->email }}</a>@endif</div>
     </div>
     <div class="container footer-bottom"><small>© {{ date('Y') }} {{ $school->name }}</small><a href="{{ route('login') }}">Masuk pengelola</a></div>

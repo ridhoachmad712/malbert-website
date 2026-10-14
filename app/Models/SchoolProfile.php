@@ -3,9 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Route;
 
 class SchoolProfile extends Model
 {
+    public const HOME_SECTIONS = [
+        'shortcuts' => ['label' => 'Pintasan', 'order' => 10],
+        'updates' => ['label' => 'Berita, pengumuman, agenda', 'order' => 20],
+        'programs' => ['label' => 'Program dan fasilitas', 'order' => 30],
+        'principal' => ['label' => 'Sambutan kepala sekolah', 'order' => 40],
+        'teachers' => ['label' => 'Profil guru', 'order' => 50],
+        'contact' => ['label' => 'Kontak sekolah', 'order' => 60],
+    ];
+
     public const NAVIGATION_DEFAULTS = [
         'home' => ['label' => 'Beranda', 'location' => 'primary', 'order' => 10],
         'profile' => ['label' => 'Profil', 'location' => 'primary', 'order' => 20],
@@ -42,7 +52,7 @@ class SchoolProfile extends Model
 
     protected function casts(): array
     {
-        return ['navigation_items' => 'array', 'hero_primary_enabled' => 'boolean', 'hero_secondary_enabled' => 'boolean'];
+        return ['navigation_items' => 'array', 'home_sections' => 'array', 'hero_primary_enabled' => 'boolean', 'hero_secondary_enabled' => 'boolean'];
     }
 
     public static function current(): self
@@ -64,5 +74,30 @@ class SchoolProfile extends Model
         uasort($items, fn (array $first, array $second): int => ($locationOrder[$first['location']] <=> $locationOrder[$second['location']]) ?: ($first['order'] <=> $second['order']));
 
         return $items;
+    }
+
+    public function homeSection(string $key): array
+    {
+        return array_merge(['enabled' => true], self::HOME_SECTIONS[$key], $this->home_sections[$key] ?? []);
+    }
+
+    public function heroUrl(string $position): ?string
+    {
+        $type = $this->{'hero_'.$position.'_target_type'} ?: 'route';
+
+        if ($type === 'page') {
+            $page = SitePage::whereKey($this->{'hero_'.$position.'_page_id'})->where('is_published', true)->first();
+
+            return $page ? route('site-page', $page->slug) : null;
+        }
+
+        $routeName = $this->{'hero_'.$position.'_route'} ?: ($position === 'primary' ? 'admissions' : 'profile');
+        $externalUrl = $this->{'hero_'.$position.'_external_url'};
+
+        return match ($type) {
+            'route' => isset(SiteMenuItem::ROUTES[$routeName]) && Route::has($routeName) ? route($routeName) : null,
+            'external' => filter_var($externalUrl, FILTER_VALIDATE_URL) && str_starts_with($externalUrl, 'https://') ? $externalUrl : null,
+            default => null,
+        };
     }
 }
