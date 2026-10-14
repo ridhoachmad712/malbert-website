@@ -33,7 +33,7 @@
         @if($school->homeSection('principal')['enabled'] && $school->principal_greeting && $school->principal_name)
             <section class="home-section home-principal {{ $school->principal_photo_path ? 'has-principal-photo' : '' }}" aria-labelledby="principal-title" style="order: {{ $school->homeSection('principal')['order'] }}">
                 @if($school->principal_photo_path)
-                    <figure class="home-principal-portrait">
+                    <figure class="home-principal-portrait" style="--principal-photo-height: {{ $school->principalPhotoHeight() }}px">
                         <img src="{{ asset('storage/'.$school->principal_photo_path) }}" alt="Foto {{ $school->principal_name }}" loading="lazy">
                     </figure>
                 @endif

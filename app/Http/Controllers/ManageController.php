@@ -238,6 +238,7 @@ class ManageController extends Controller
             'hours' => ['nullable', 'string', 'max:180'], 'map_url' => ['nullable', 'url:http,https', 'max:500'],
             'aksikita_url' => ['nullable', 'url:https', 'max:500'],
             'principal_name' => ['nullable', 'string', 'max:180'], 'principal_greeting' => ['nullable', 'string', 'max:5000'],
+            'principal_photo_height' => ['nullable', 'integer', 'between:'.SchoolProfile::PRINCIPAL_PHOTO_HEIGHT_MIN.','.SchoolProfile::PRINCIPAL_PHOTO_HEIGHT_MAX],
             'admission_intro' => ['nullable', 'string', 'max:3000'], 'admission_requirements' => ['nullable', 'string', 'max:5000'],
             'admission_steps' => ['nullable', 'string', 'max:5000'], 'admission_schedule' => ['nullable', 'string', 'max:3000'],
             'admission_url' => ['nullable', 'url:http,https', 'max:500'],

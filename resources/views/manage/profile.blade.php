@@ -30,7 +30,7 @@
     </section>
     <section id="kepala-sekolah" class="panel manage-profile-section" aria-labelledby="kepala-title">
         <h2 id="kepala-title">Sambutan kepala sekolah</h2>
-        <p>Isi nama dan sambutan resmi. Foto PNG kepala sekolah akan tampil di sisi kanan bagian sambutan pada beranda.</p>
+        <p>Isi nama dan sambutan resmi. Foto PNG kepala sekolah tampil di sisi kiri bagian sambutan pada beranda.</p>
         <div class="form-grid">
             <label class="wide">Nama kepala sekolah<input name="principal_name" value="{{ old('principal_name', $school->principal_name) }}" maxlength="180"></label>
             <div class="wide principal-photo-setting">
@@ -40,6 +40,7 @@
                 <label>Foto kepala sekolah (PNG)<input type="file" name="principal_photo" accept="image/png"><small>Gunakan foto potret PNG dengan latar transparan, maksimal 4 MB.</small></label>
                 @if($school->principal_photo_path)<label class="check"><input type="checkbox" name="remove_principal_photo" value="1"> Hapus foto saat ini</label>@endif
             </div>
+            <label>Ukuran tinggi foto (px)<input type="number" name="principal_photo_height" min="{{ \App\Models\SchoolProfile::PRINCIPAL_PHOTO_HEIGHT_MIN }}" max="{{ \App\Models\SchoolProfile::PRINCIPAL_PHOTO_HEIGHT_MAX }}" step="1" value="{{ old('principal_photo_height', $school->principalPhotoHeight()) }}"><small>Atur antara 220–420 px. Ukuran awal 300 px; kartu akan menyesuaikan isi.</small></label>
             <label class="wide">Sambutan<textarea name="principal_greeting" rows="5">{{ old('principal_greeting', $school->principal_greeting) }}</textarea></label>
         </div>
     </section>

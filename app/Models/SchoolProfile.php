@@ -7,6 +7,12 @@ use Illuminate\Support\Facades\Route;
 
 class SchoolProfile extends Model
 {
+    public const PRINCIPAL_PHOTO_HEIGHT_MIN = 220;
+
+    public const PRINCIPAL_PHOTO_HEIGHT_MAX = 420;
+
+    public const PRINCIPAL_PHOTO_HEIGHT_DEFAULT = 300;
+
     public const HOME_SECTIONS = [
         'shortcuts' => ['label' => 'Pintasan', 'order' => 10],
         'principal' => ['label' => 'Sambutan kepala sekolah', 'order' => 11],
@@ -52,12 +58,17 @@ class SchoolProfile extends Model
 
     protected function casts(): array
     {
-        return ['navigation_items' => 'array', 'home_sections' => 'array', 'hero_primary_enabled' => 'boolean', 'hero_secondary_enabled' => 'boolean'];
+        return ['navigation_items' => 'array', 'home_sections' => 'array', 'hero_primary_enabled' => 'boolean', 'hero_secondary_enabled' => 'boolean', 'principal_photo_height' => 'integer'];
     }
 
     public static function current(): self
     {
         return self::firstOrCreate([], ['name' => 'Nama sekolah belum diisi']);
+    }
+
+    public function principalPhotoHeight(): int
+    {
+        return max(self::PRINCIPAL_PHOTO_HEIGHT_MIN, min(self::PRINCIPAL_PHOTO_HEIGHT_MAX, $this->principal_photo_height ?? self::PRINCIPAL_PHOTO_HEIGHT_DEFAULT));
     }
 
     public function navigationItems(): array

@@ -65,12 +65,14 @@ class SchoolInformationTest extends TestCase
             'principal_name' => 'Ibu Kepala Sekolah',
             'principal_greeting' => str_repeat('Selamat datang di sekolah kami. ', 20),
             'principal_photo' => UploadedFile::fake()->image('kepala-sekolah.png'),
+            'principal_photo_height' => 260,
         ])->assertRedirect()->assertSessionHasNoErrors();
 
         $school->refresh();
         Storage::disk('public')->assertExists($school->principal_photo_path);
         $photoPath = $school->principal_photo_path;
-        $this->get('/')->assertOk()->assertSeeInOrder(['home-shortcuts', 'home-principal-portrait', 'home-principal-copy', 'home-principal-name', 'home-updates'])->assertSee($school->principal_greeting)->assertDontSee('home-hero-principal');
+        $this->get('/')->assertOk()->assertSeeInOrder(['home-shortcuts', 'home-principal-portrait', 'home-principal-copy', 'home-principal-name', 'home-updates'])->assertSee('style="--principal-photo-height: 260px"', false)->assertSee($school->principal_greeting)->assertDontSee('home-hero-principal');
+        $this->get(route('manage.profile'))->assertSee('name="principal_photo_height"', false)->assertSee('value="260"', false);
 
         $this->actingAs($admin)->put(route('manage.profile.update'), [
             'name' => $school->name,
@@ -92,5 +94,17 @@ class SchoolInformationTest extends TestCase
             'principal_photo' => UploadedFile::fake()->image('kepala-sekolah.jpg'),
         ])->assertSessionHasErrors('principal_photo');
         $this->assertNull(SchoolProfile::current()->principal_photo_path);
+    }
+
+    public function test_principal_photo_height_must_stay_within_allowed_range(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)->put(route('manage.profile.update'), [
+            'name' => 'Sekolah Contoh',
+            'principal_photo_height' => 600,
+        ])->assertSessionHasErrors('principal_photo_height');
+
+        $this->assertSame(300, SchoolProfile::current()->principalPhotoHeight());
     }
 }
