@@ -6,8 +6,8 @@
     <meta name="robots" content="noindex,nofollow">
     <title>@yield('title', 'Ruang pengelola') · {{ $school->name }}</title>
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
-    <link rel="stylesheet" href="{{ asset('css/school.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/school-manage.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/school.css') }}?v={{ filemtime(public_path('css/school.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/school-manage.css') }}?v={{ filemtime(public_path('css/school-manage.css')) }}">
 </head>
 <body class="manage-body">
 @php($activeContentType = request()->route('type') ?? ($post->type ?? null))
@@ -62,6 +62,6 @@
         @yield('content')
     </main>
 </div>
-<script src="{{ asset('js/school.js') }}" defer></script>
+<script src="{{ asset('js/school.js') }}?v={{ filemtime(public_path('js/school.js')) }}" defer></script>
 </body>
 </html>

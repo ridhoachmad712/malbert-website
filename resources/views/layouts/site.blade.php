@@ -6,8 +6,8 @@
     <title>@yield('title', $school->name) · {{ $school->name }}</title>
     <meta name="description" content="@yield('description', $school->tagline ?: 'Informasi resmi sekolah, berita, pengumuman, dan profil guru.')">
     <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
-    <link rel="stylesheet" href="{{ asset('css/school.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/school-public.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/school.css') }}?v={{ filemtime(public_path('css/school.css')) }}">
+    <link rel="stylesheet" href="{{ asset('css/school-public.css') }}?v={{ filemtime(public_path('css/school-public.css')) }}">
     <style>:root{--blue:{{ $school->theme_primary_color ?: '#2459d8' }};--blue-deep:color-mix(in srgb,var(--blue) 76%,#061f48);--green:{{ $school->theme_accent_color ?: '#1b7661' }}}</style>
     @auth<meta name="robots" content="noindex" />@endauth
 </head>
@@ -53,6 +53,6 @@
     </div>
     <div class="container footer-bottom"><small>© {{ date('Y') }} {{ $school->name }}</small><a href="{{ route('login') }}">Masuk pengelola</a></div>
 </footer>
-<script src="{{ asset('js/school.js') }}" defer></script>
+<script src="{{ asset('js/school.js') }}?v={{ filemtime(public_path('js/school.js')) }}" defer></script>
 </body>
 </html>
