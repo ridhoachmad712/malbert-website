@@ -70,7 +70,7 @@ class SchoolInformationTest extends TestCase
         $school->refresh();
         Storage::disk('public')->assertExists($school->principal_photo_path);
         $photoPath = $school->principal_photo_path;
-        $this->get('/')->assertOk()->assertSeeInOrder(['home-shortcuts', 'home-principal-copy', 'home-principal-name', 'home-principal-portrait', 'home-updates'])->assertSee($school->principal_greeting)->assertDontSee('home-hero-principal');
+        $this->get('/')->assertOk()->assertSeeInOrder(['home-shortcuts', 'home-principal-portrait', 'home-principal-copy', 'home-principal-name', 'home-updates'])->assertSee($school->principal_greeting)->assertDontSee('home-hero-principal');
 
         $this->actingAs($admin)->put(route('manage.profile.update'), [
             'name' => $school->name,

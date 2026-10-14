@@ -32,6 +32,11 @@
 
         @if($school->homeSection('principal')['enabled'] && $school->principal_greeting && $school->principal_name)
             <section class="home-section home-principal {{ $school->principal_photo_path ? 'has-principal-photo' : '' }}" aria-labelledby="principal-title" style="order: {{ $school->homeSection('principal')['order'] }}">
+                @if($school->principal_photo_path)
+                    <figure class="home-principal-portrait">
+                        <img src="{{ asset('storage/'.$school->principal_photo_path) }}" alt="Foto {{ $school->principal_name }}" loading="lazy">
+                    </figure>
+                @endif
                 <div class="home-principal-copy">
                     <span class="eyebrow">DARI KEPALA SEKOLAH</span>
                     <h2 id="principal-title">Sambutan kepala sekolah</h2>
@@ -39,11 +44,6 @@
                     <strong class="home-principal-name">{{ $school->principal_name }}</strong>
                     <a class="text-link" href="{{ route('profile') }}">Baca profil sekolah</a>
                 </div>
-                @if($school->principal_photo_path)
-                    <figure class="home-principal-portrait">
-                        <img src="{{ asset('storage/'.$school->principal_photo_path) }}" alt="Foto {{ $school->principal_name }}" loading="lazy">
-                    </figure>
-                @endif
             </section>
         @endif
 

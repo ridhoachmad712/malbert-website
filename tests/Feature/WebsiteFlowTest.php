@@ -7,7 +7,9 @@ use App\Models\Teacher;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class WebsiteFlowTest extends TestCase
@@ -27,6 +29,22 @@ class WebsiteFlowTest extends TestCase
     {
         foreach (['/', '/profil', '/guru', '/berita', '/pengumuman', '/galeri', '/kontak', '/masuk'] as $path) {
             $this->get($path)->assertOk();
+        }
+    }
+
+    public function test_public_stylesheet_version_uses_the_served_file(): void
+    {
+        $documentRoot = storage_path('framework/testing/document-root-'.Str::random(8));
+        File::ensureDirectoryExists($documentRoot.'/css');
+        File::put($documentRoot.'/css/school-public.css', 'served stylesheet');
+
+        try {
+            $version = substr(hash('sha256', 'served stylesheet'), 0, 12);
+            $this->withServerVariables(['DOCUMENT_ROOT' => $documentRoot])->get('/')
+                ->assertOk()
+                ->assertSee('school-public.css?v='.$version);
+        } finally {
+            File::deleteDirectory($documentRoot);
         }
     }
 
