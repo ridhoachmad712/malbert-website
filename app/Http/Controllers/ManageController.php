@@ -10,6 +10,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
@@ -241,6 +242,8 @@ class ManageController extends Controller
             'admission_steps' => ['nullable', 'string', 'max:5000'], 'admission_schedule' => ['nullable', 'string', 'max:3000'],
             'admission_url' => ['nullable', 'url:http,https', 'max:500'],
             'logo' => ['nullable', 'image', 'max:2048'], 'hero' => ['nullable', 'image', 'max:4096'],
+            'principal_photo' => ['nullable', 'image', 'mimes:png', 'max:4096'],
+            'remove_principal_photo' => ['nullable', 'boolean'],
         ]);
         foreach (['logo', 'hero'] as $image) {
             if ($request->hasFile($image)) {
@@ -248,7 +251,18 @@ class ManageController extends Controller
             }
             unset($data[$image]);
         }
-        SchoolProfile::current()->update($data);
+        $school = SchoolProfile::current();
+        $previousPrincipalPhoto = $school->principal_photo_path;
+        if ($request->hasFile('principal_photo')) {
+            $data['principal_photo_path'] = $request->file('principal_photo')->storePublicly('school', 'public');
+        } elseif ($request->boolean('remove_principal_photo')) {
+            $data['principal_photo_path'] = null;
+        }
+        unset($data['principal_photo'], $data['remove_principal_photo']);
+        $school->update($data);
+        if ($previousPrincipalPhoto && array_key_exists('principal_photo_path', $data)) {
+            Storage::disk('public')->delete($previousPrincipalPhoto);
+        }
 
         return back()->with('success', 'Profil sekolah diperbarui.');
     }

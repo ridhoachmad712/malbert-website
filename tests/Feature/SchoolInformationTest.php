@@ -6,6 +6,8 @@ use App\Models\Post;
 use App\Models\SchoolProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class SchoolInformationTest extends TestCase
@@ -49,5 +51,44 @@ class SchoolInformationTest extends TestCase
         $this->get('/profil')->assertSee('Kepala Sekolah Resmi');
         $this->get('/penerimaan')->assertSee('Pendaftaran akan dibuka.');
         $this->assertSame('Sekolah Pilihan Pengguna', SchoolProfile::current()->fresh()->name);
+    }
+
+    public function test_admin_can_show_and_remove_principal_png_in_home_hero(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['role' => 'admin']);
+        $school = SchoolProfile::current();
+
+        $this->get('/')->assertDontSee('home-hero-principal');
+        $this->actingAs($admin)->put(route('manage.profile.update'), [
+            'name' => $school->name,
+            'principal_name' => 'Ibu Kepala Sekolah',
+            'principal_photo' => UploadedFile::fake()->image('kepala-sekolah.png'),
+        ])->assertRedirect()->assertSessionHasNoErrors();
+
+        $school->refresh();
+        Storage::disk('public')->assertExists($school->principal_photo_path);
+        $photoPath = $school->principal_photo_path;
+        $this->get('/')->assertOk()->assertSee('home-hero-principal')->assertSee('Ibu Kepala Sekolah');
+
+        $this->actingAs($admin)->put(route('manage.profile.update'), [
+            'name' => $school->name,
+            'principal_name' => $school->principal_name,
+            'remove_principal_photo' => '1',
+        ])->assertRedirect()->assertSessionHasNoErrors();
+        Storage::disk('public')->assertMissing($photoPath);
+        $this->get('/')->assertDontSee('home-hero-principal');
+    }
+
+    public function test_principal_hero_photo_requires_png(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)->put(route('manage.profile.update'), [
+            'name' => 'Sekolah Contoh',
+            'principal_photo' => UploadedFile::fake()->image('kepala-sekolah.jpg'),
+        ])->assertSessionHasErrors('principal_photo');
+        $this->assertNull(SchoolProfile::current()->principal_photo_path);
     }
 }

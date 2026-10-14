@@ -30,9 +30,16 @@
     </section>
     <section id="kepala-sekolah" class="panel manage-profile-section" aria-labelledby="kepala-title">
         <h2 id="kepala-title">Sambutan kepala sekolah</h2>
-        <p>Isi nama dan sambutan resmi sebelum ditampilkan di beranda.</p>
+        <p>Isi nama dan sambutan resmi. Foto PNG kepala sekolah akan tampil di sisi kanan hero beranda.</p>
         <div class="form-grid">
             <label class="wide">Nama kepala sekolah<input name="principal_name" value="{{ old('principal_name', $school->principal_name) }}" maxlength="180"></label>
+            <div class="wide principal-photo-setting">
+                @if($school->principal_photo_path)
+                    <img src="{{ asset('storage/'.$school->principal_photo_path) }}" alt="Foto kepala sekolah saat ini">
+                @endif
+                <label>Foto kepala sekolah (PNG)<input type="file" name="principal_photo" accept="image/png"><small>Gunakan foto potret PNG dengan latar transparan, maksimal 4 MB.</small></label>
+                @if($school->principal_photo_path)<label class="check"><input type="checkbox" name="remove_principal_photo" value="1"> Hapus foto saat ini</label>@endif
+            </div>
             <label class="wide">Sambutan<textarea name="principal_greeting" rows="5">{{ old('principal_greeting', $school->principal_greeting) }}</textarea></label>
         </div>
     </section>

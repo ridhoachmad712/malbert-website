@@ -239,6 +239,9 @@
 .builder-delete { max-width: 1080px; margin-top: 18px; text-align: right; }
 .builder-delete button { padding: 9px 12px; border: 1px solid #d7a5a5; border-radius: 8px; background: #fff; color: #9e3030; font-size: .8rem; }
 .builder-image-preview img { max-width: 300px; max-height: 200px; object-fit: cover; border-radius: 8px; }
+.principal-photo-setting { display: grid; justify-items: start; gap: 14px; }
+.principal-photo-setting>img { display: block; max-width: 240px; max-height: 240px; object-fit: contain; border: 1px solid var(--line); border-radius: 8px; background: #eaf0f8; }
+.principal-photo-setting label { width: 100%; }
 .builder-section-list { display: grid; gap: 0; }
 .builder-section-row { display: grid; grid-template-columns: 1fr 150px 115px; gap: 20px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
 .builder-section-row strong { font-size: .83rem; }

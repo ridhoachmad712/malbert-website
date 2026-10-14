@@ -2,7 +2,7 @@
 @section('title', 'Beranda')
 @section('content')
 <div class="home-page">
-    <section class="home-hero hero-overlay-{{ $school->hero_overlay ?: 'normal' }} hero-style-{{ $school->hero_style ?: 'full' }}" aria-labelledby="hero-title">
+    <section class="home-hero hero-overlay-{{ $school->hero_overlay ?: 'normal' }} hero-style-{{ $school->hero_style ?: 'full' }} {{ $school->principal_photo_path ? 'has-principal-photo' : '' }}" aria-labelledby="hero-title">
         @if($school->hero_path)
             <div class="home-hero-background" aria-hidden="true"><img class="hero-position-{{ $school->hero_image_position ?: 'center' }}" src="{{ asset('storage/'.$school->hero_path) }}" alt="" fetchpriority="high"></div>
         @endif
@@ -16,6 +16,12 @@
                     @if(($school->hero_secondary_enabled ?? true) && $school->heroUrl('secondary'))<a class="home-hero-secondary" href="{{ $school->heroUrl('secondary') }}" @if($school->hero_secondary_target_type === 'external')target="_blank" rel="noopener noreferrer"@endif>{{ $school->hero_secondary_label ?: 'Profil sekolah' }}</a>@endif
                 </div>
             </div>
+            @if($school->principal_photo_path)
+                <figure class="home-hero-principal">
+                    <img src="{{ asset('storage/'.$school->principal_photo_path) }}" alt="Foto {{ $school->principal_name ?: 'kepala sekolah' }}" fetchpriority="high">
+                    <figcaption><span>Kepala Sekolah</span><strong>{{ $school->principal_name ?: 'Kepala Sekolah' }}</strong></figcaption>
+                </figure>
+            @endif
         </div>
         @if($school->hero_path && str_starts_with($school->hero_path, 'demo/'))<p class="home-hero-demo-note">Ilustrasi contoh · ganti dengan foto sekolah yang telah disetujui</p>@endif
     </section>
