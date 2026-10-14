@@ -111,15 +111,13 @@
 .home-principal { position: relative; display: flex; justify-content: space-between; min-height: 245px; padding: 36px 42px; overflow: hidden; border-radius: 12px; background: #edf3fb; }
 .home-principal>div { position: relative; z-index: 1; max-width: 780px; margin-left: auto; text-align: right; }
 .home-principal h2 { margin-bottom: 13px; }
-.home-principal p { margin-bottom: 13px; font-size: .92rem; line-height: 1.8; }
+.home-principal p { margin-bottom: 18px; font-size: .92rem; line-height: 1.8; white-space: pre-line; }
 .home-principal strong { display: block; margin-bottom: 14px; color: var(--navy); font-size: .8rem; }
-.home-principal.has-principal-photo { display: grid; grid-template-columns: minmax(250px, 34%) minmax(0, 1fr); gap: 28px; align-items: stretch; min-height: 355px; padding-bottom: 0; }
-.home-principal.has-principal-photo .home-principal-copy { align-self: center; padding-bottom: 36px; }
-.home-principal-portrait { position: relative; min-height: 319px; margin: 0; }
-.home-principal-portrait>img { position: absolute; bottom: 0; left: 50%; width: 100%; height: 100%; transform: translateX(-50%); object-fit: contain; object-position: bottom center; filter: drop-shadow(0 10px 18px rgb(20 40 68 / 16%)); }
-.home-principal-portrait figcaption { position: absolute; right: 8px; bottom: 18px; left: 8px; display: grid; gap: 3px; padding: 11px 14px; border: 1px solid #d8e3f3; border-radius: 9px; background: rgb(255 255 255 / 95%); box-shadow: 0 8px 26px rgb(20 40 68 / 12%); text-align: center; }
-.home-principal-portrait figcaption span { color: var(--muted); font-size: .65rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
-.home-principal-portrait figcaption strong { margin: 0; font-size: .82rem; line-height: 1.35; }
+.home-principal .home-principal-name { margin-bottom: 18px; font-size: .86rem; }
+.home-principal.has-principal-photo { display: grid; grid-template-columns: minmax(250px, 34%) minmax(0, 1fr); gap: 28px; align-items: stretch; min-height: 470px; padding-bottom: 0; }
+.home-principal.has-principal-photo .home-principal-copy { grid-column: 2; grid-row: 1; align-self: center; padding-bottom: 36px; }
+.home-principal-portrait { position: relative; grid-column: 1; grid-row: 1; align-self: end; width: 100%; height: clamp(360px, 32vw, 520px); margin: 0; }
+.home-principal-portrait>img { position: absolute; right: 0; bottom: 0; left: 0; display: block; width: 100%; height: 100%; object-fit: contain; object-position: bottom center; filter: drop-shadow(0 10px 18px rgb(20 40 68 / 16%)); }
 .teacher-card { display: flex; flex-direction: column; align-items: flex-start; min-height: 230px; padding: 24px; background: white; box-shadow: none; }
 .teacher-photo { flex: none; width: 70px; height: 70px; aspect-ratio: 1; overflow: hidden; border: 3px solid white; border-radius: 50%; background: #e8efff; box-shadow: 0 0 0 1px #dfe7f4; }
 .teacher-card:nth-child(even) .teacher-photo { background: #e9f4ec; }
@@ -221,8 +219,8 @@
 
 @media (max-width: 700px) {
     .home-principal.has-principal-photo { grid-template-columns: 1fr; gap: 0; padding: 28px 25px 0; }
-    .home-principal.has-principal-photo .home-principal-copy { padding-bottom: 20px; }
-    .home-principal-portrait { width: min(100%, 360px); min-height: 310px; margin-inline: auto; }
+    .home-principal.has-principal-photo .home-principal-copy { grid-column: 1; grid-row: 1; padding-bottom: 20px; }
+    .home-principal-portrait { grid-column: 1; grid-row: 2; width: min(100%, 360px); height: 340px; margin-inline: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

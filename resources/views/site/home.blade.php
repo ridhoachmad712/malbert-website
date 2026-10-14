@@ -30,6 +30,23 @@
         </nav>
         @endif
 
+        @if($school->homeSection('principal')['enabled'] && $school->principal_greeting && $school->principal_name)
+            <section class="home-section home-principal {{ $school->principal_photo_path ? 'has-principal-photo' : '' }}" aria-labelledby="principal-title" style="order: {{ $school->homeSection('principal')['order'] }}">
+                <div class="home-principal-copy">
+                    <span class="eyebrow">DARI KEPALA SEKOLAH</span>
+                    <h2 id="principal-title">Sambutan kepala sekolah</h2>
+                    <p>{{ $school->principal_greeting }}</p>
+                    <strong class="home-principal-name">{{ $school->principal_name }}</strong>
+                    <a class="text-link" href="{{ route('profile') }}">Baca profil sekolah</a>
+                </div>
+                @if($school->principal_photo_path)
+                    <figure class="home-principal-portrait">
+                        <img src="{{ asset('storage/'.$school->principal_photo_path) }}" alt="Foto {{ $school->principal_name }}" loading="lazy">
+                    </figure>
+                @endif
+            </section>
+        @endif
+
         @if($school->homeSection('updates')['enabled'])
         <section class="home-section home-updates" aria-labelledby="updates-title" style="order: {{ $school->homeSection('updates')['order'] }}">
             <div class="section-heading"><div><span class="eyebrow">BERITA SEKOLAH</span><h2 id="updates-title">Kabar terbaru</h2></div><a class="text-link" href="{{ route('news') }}">Semua berita</a></div>
@@ -84,24 +101,6 @@
                 </div>
             </div>
         </section>
-        @endif
-
-        @if($school->homeSection('principal')['enabled'] && $school->principal_greeting && $school->principal_name)
-            <section class="home-section home-principal {{ $school->principal_photo_path ? 'has-principal-photo' : '' }}" aria-labelledby="principal-title" style="order: {{ $school->homeSection('principal')['order'] }}">
-                @if($school->principal_photo_path)
-                    <figure class="home-principal-portrait">
-                        <img src="{{ asset('storage/'.$school->principal_photo_path) }}" alt="Foto {{ $school->principal_name }}" loading="lazy">
-                        <figcaption><span>Kepala Sekolah</span><strong>{{ $school->principal_name }}</strong></figcaption>
-                    </figure>
-                @endif
-                <div class="home-principal-copy">
-                    <span class="eyebrow">DARI KEPALA SEKOLAH</span>
-                    <h2 id="principal-title">Sambutan kepala sekolah</h2>
-                    <p>{{ Str::limit($school->principal_greeting, 300) }}</p>
-                    @unless($school->principal_photo_path)<strong>{{ $school->principal_name }}</strong>@endunless
-                    <a class="text-link" href="{{ route('profile') }}">Baca profil sekolah</a>
-                </div>
-            </section>
         @endif
 
         @if($school->homeSection('teachers')['enabled'] && $teachers->isNotEmpty())

@@ -9,9 +9,9 @@ class SchoolProfile extends Model
 {
     public const HOME_SECTIONS = [
         'shortcuts' => ['label' => 'Pintasan', 'order' => 10],
+        'principal' => ['label' => 'Sambutan kepala sekolah', 'order' => 11],
         'updates' => ['label' => 'Berita, pengumuman, agenda', 'order' => 20],
         'programs' => ['label' => 'Program dan fasilitas', 'order' => 30],
-        'principal' => ['label' => 'Sambutan kepala sekolah', 'order' => 40],
         'teachers' => ['label' => 'Profil guru', 'order' => 50],
         'contact' => ['label' => 'Kontak sekolah', 'order' => 60],
     ];

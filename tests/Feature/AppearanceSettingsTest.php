@@ -13,6 +13,24 @@ class AppearanceSettingsTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_existing_section_settings_move_principal_after_shortcuts(): void
+    {
+        $school = SchoolProfile::current();
+        $school->update(['home_sections' => [
+            'shortcuts' => ['enabled' => true, 'order' => 12],
+            'updates' => ['enabled' => false, 'order' => 20],
+            'principal' => ['enabled' => true, 'order' => 40],
+        ]]);
+
+        $migration = require database_path('migrations/2026_10_14_023042_move_principal_section_after_shortcuts.php');
+        $migration->up();
+
+        $school->refresh();
+        $this->assertSame(13, $school->homeSection('principal')['order']);
+        $this->assertFalse($school->homeSection('updates')['enabled']);
+        $this->assertSame(11, SchoolProfile::HOME_SECTIONS['principal']['order']);
+    }
+
     public function test_admin_can_change_hero_theme_and_home_sections(): void
     {
         Storage::fake('public');

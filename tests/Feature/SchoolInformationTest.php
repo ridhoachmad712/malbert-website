@@ -63,14 +63,14 @@ class SchoolInformationTest extends TestCase
         $this->actingAs($admin)->put(route('manage.profile.update'), [
             'name' => $school->name,
             'principal_name' => 'Ibu Kepala Sekolah',
-            'principal_greeting' => 'Selamat datang di sekolah kami.',
+            'principal_greeting' => str_repeat('Selamat datang di sekolah kami. ', 20),
             'principal_photo' => UploadedFile::fake()->image('kepala-sekolah.png'),
         ])->assertRedirect()->assertSessionHasNoErrors();
 
         $school->refresh();
         Storage::disk('public')->assertExists($school->principal_photo_path);
         $photoPath = $school->principal_photo_path;
-        $this->get('/')->assertOk()->assertSeeInOrder(['home-principal-portrait', 'home-principal-copy'])->assertSee('Ibu Kepala Sekolah')->assertDontSee('home-hero-principal');
+        $this->get('/')->assertOk()->assertSeeInOrder(['home-shortcuts', 'home-principal-copy', 'home-principal-name', 'home-principal-portrait', 'home-updates'])->assertSee($school->principal_greeting)->assertDontSee('home-hero-principal');
 
         $this->actingAs($admin)->put(route('manage.profile.update'), [
             'name' => $school->name,
