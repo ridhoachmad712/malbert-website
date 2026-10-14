@@ -109,7 +109,7 @@
 .home-program-grid>.empty { min-height: 240px; }
 
 .home-principal { position: relative; display: flex; justify-content: space-between; min-height: 245px; padding: 36px 42px; overflow: hidden; border-radius: 12px; background: #edf3fb; }
-.home-principal>div { position: relative; z-index: 1; max-width: 780px; margin-left: auto; text-align: right; }
+.home-principal>div { position: relative; z-index: 1; max-width: 780px; margin-left: auto; text-align: left; }
 .home-principal h2 { margin-bottom: 13px; }
 .home-principal p { margin-bottom: 18px; font-size: .92rem; line-height: 1.8; white-space: pre-line; }
 .home-principal strong { display: block; margin-bottom: 14px; color: var(--navy); font-size: .8rem; }
