@@ -12,6 +12,10 @@
         $publicStylesheet = $servedPublicStylesheet && is_file($servedPublicStylesheet)
             ? $servedPublicStylesheet
             : public_path('css/school-public.css');
+        $servedPublicScript = $documentRoot ? $documentRoot.'/js/school.js' : null;
+        $publicScript = $servedPublicScript && is_file($servedPublicScript)
+            ? $servedPublicScript
+            : public_path('js/school.js');
     @endphp
     <link rel="stylesheet" href="{{ asset('css/school.css') }}?v={{ filemtime(public_path('css/school.css')) }}">
     <link rel="stylesheet" href="{{ asset('css/school-public.css') }}?v={{ substr(hash_file('sha256', $publicStylesheet), 0, 12) }}">
@@ -60,6 +64,6 @@
     </div>
     <div class="container footer-bottom"><small>© {{ date('Y') }} {{ $school->name }}</small><a href="{{ route('login') }}">Masuk pengelola</a></div>
 </footer>
-<script src="{{ asset('js/school.js') }}?v={{ filemtime(public_path('js/school.js')) }}" defer></script>
+<script src="{{ asset('js/school.js') }}?v={{ substr(hash_file('sha256', $publicScript), 0, 12) }}" defer></script>
 </body>
 </html>

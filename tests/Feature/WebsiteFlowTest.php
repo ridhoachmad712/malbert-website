@@ -32,17 +32,21 @@ class WebsiteFlowTest extends TestCase
         }
     }
 
-    public function test_public_stylesheet_version_uses_the_served_file(): void
+    public function test_public_asset_versions_use_the_served_files(): void
     {
         $documentRoot = storage_path('framework/testing/document-root-'.Str::random(8));
         File::ensureDirectoryExists($documentRoot.'/css');
+        File::ensureDirectoryExists($documentRoot.'/js');
         File::put($documentRoot.'/css/school-public.css', 'served stylesheet');
+        File::put($documentRoot.'/js/school.js', 'served script');
 
         try {
             $version = substr(hash('sha256', 'served stylesheet'), 0, 12);
+            $scriptVersion = substr(hash('sha256', 'served script'), 0, 12);
             $this->withServerVariables(['DOCUMENT_ROOT' => $documentRoot])->get('/')
                 ->assertOk()
-                ->assertSee('school-public.css?v='.$version);
+                ->assertSee('school-public.css?v='.$version)
+                ->assertSee('school.js?v='.$scriptVersion);
         } finally {
             File::deleteDirectory($documentRoot);
         }
@@ -84,6 +88,27 @@ class WebsiteFlowTest extends TestCase
 
         $this->actingAs($admin)->put(route('manage.teachers.update', $teacher), ['name' => 'Guru Contoh', 'position' => 'Wali kelas', 'publication_approved' => '1', 'is_published' => '1'])->assertRedirect(route('manage.teachers'));
         $this->get(route('teacher', $teacher->slug))->assertOk();
+    }
+
+    public function test_home_teacher_carousel_shows_names_and_positions_of_approved_teachers(): void
+    {
+        foreach (range(1, 5) as $number) {
+            Teacher::create([
+                'name' => 'Guru '.$number,
+                'slug' => 'guru-'.$number,
+                'position' => 'Wali kelas '.$number,
+                'sort_order' => $number,
+                'is_published' => true,
+                'publication_approved' => true,
+            ]);
+        }
+        Teacher::create(['name' => 'Guru Privat', 'slug' => 'guru-privat', 'position' => 'Guru', 'is_published' => true, 'publication_approved' => false]);
+
+        $this->get('/')->assertOk()
+            ->assertSee('data-teacher-carousel')
+            ->assertSeeInOrder(['Guru 1', 'Wali kelas 1', 'Guru 5', 'Wali kelas 5'])
+            ->assertSee('data-teacher-next')
+            ->assertDontSee('Guru Privat');
     }
 
     public function test_sitemap_only_contains_public_content(): void

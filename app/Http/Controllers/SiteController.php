@@ -21,7 +21,7 @@ class SiteController extends Controller
             'news' => Post::public()->where('type', 'news')->latest('published_at')->take(3)->get(),
             'events' => Post::public()->where('type', 'event')->whereDate('event_date', '>=', today())->orderBy('event_date')->take(3)->get(),
             'programs' => Post::public()->where('type', 'program')->latest('published_at')->take(1)->get(),
-            'teachers' => Teacher::where('is_published', true)->where('publication_approved', true)->orderBy('sort_order')->take(4)->get(),
+            'teachers' => Teacher::where('is_published', true)->where('publication_approved', true)->orderBy('sort_order')->orderBy('name')->take(12)->get(),
         ]);
     }
 

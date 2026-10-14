@@ -104,7 +104,25 @@
         @endif
 
         @if($school->homeSection('teachers')['enabled'] && $teachers->isNotEmpty())
-            <section class="home-section home-teachers" aria-labelledby="teachers-title" style="order: {{ $school->homeSection('teachers')['order'] }}"><div class="section-heading"><div><span class="eyebrow">GURU DAN TENAGA KEPENDIDIKAN</span><h2 id="teachers-title">Orang-orang di sekolah</h2></div><a class="text-link" href="{{ route('teachers') }}">Semua profil guru</a></div><div class="teacher-grid">@foreach($teachers as $teacher)<x-teacher-card :teacher="$teacher" />@endforeach</div></section>
+            <section class="home-section home-teachers" aria-labelledby="teachers-title" style="order: {{ $school->homeSection('teachers')['order'] }}">
+                <div class="section-heading">
+                    <div><span class="eyebrow">GURU DAN TENAGA KEPENDIDIKAN</span><h2 id="teachers-title">Orang-orang di sekolah</h2></div>
+                    <a class="text-link" href="{{ route('teachers') }}">Semua profil guru</a>
+                </div>
+                @if($teachers->isNotEmpty())
+                    <div class="teacher-carousel" data-teacher-carousel>
+                        <div class="teacher-carousel-track" tabindex="0" aria-label="Profil guru dan tenaga kependidikan, geser untuk melihat lainnya">
+                            @foreach($teachers as $teacher)<x-teacher-card :teacher="$teacher" />@endforeach
+                        </div>
+                        <div class="teacher-carousel-controls" hidden>
+                            <button type="button" data-teacher-prev aria-label="Lihat guru sebelumnya">Sebelumnya</button>
+                            <button type="button" data-teacher-next aria-label="Lihat guru berikutnya">Berikutnya</button>
+                        </div>
+                    </div>
+                @else
+                    <div class="empty"><strong>Profil guru belum diterbitkan.</strong><p>Profil akan tampil setelah mendapat persetujuan untuk dipublikasikan.</p></div>
+                @endif
+            </section>
         @endif
 
         @if($school->homeSection('contact')['enabled'])

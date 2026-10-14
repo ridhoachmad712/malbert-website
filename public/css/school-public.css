@@ -126,9 +126,20 @@
 .teacher-card small { color: var(--blue-deep); }
 .teacher-card h3 { margin: 7px 0; font-size: 1.06rem; }
 .teacher-card p { line-height: 1.55; }
-.home-teachers .teacher-card { min-height: 190px; padding: 22px; }
-.home-teachers .teacher-photo { width: 62px; height: 62px; aspect-ratio: 1; }
+.teacher-carousel-track { display: grid; grid-auto-flow: column; grid-auto-columns: clamp(240px, 30%, 360px); gap: 18px; overflow-x: auto; padding-bottom: 4px; scroll-snap-type: x mandatory; scroll-behavior: smooth; overscroll-behavior-inline: contain; scrollbar-width: none; }
+.teacher-carousel-track::-webkit-scrollbar { display: none; }
+.home-teachers .teacher-card { min-width: 0; min-height: 0; padding: 0; border-radius: 4px; scroll-snap-align: start; }
+.home-teachers .teacher-photo { display: grid; place-items: center; width: 100%; height: auto; aspect-ratio: 1.18; overflow: hidden; border: 0; border-radius: 0; background: #edf2fa; box-shadow: none; }
+.home-teachers .teacher-photo img { width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+.home-teachers .teacher-photo span { font-size: 4rem; }
+.home-teachers .teacher-card .teacher-card-copy { width: 100%; min-height: 116px; padding: 18px 20px 21px; }
+.home-teachers .teacher-card h3 { margin: 0 0 10px; font-size: 1.02rem; line-height: 1.35; }
+.home-teachers .teacher-card small { display: block; color: var(--muted); font-size: .76rem; font-weight: 600; line-height: 1.45; }
 .home-teachers .teacher-card p { display: none; }
+.teacher-carousel-controls { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.teacher-carousel-controls[hidden] { display: none; }
+.teacher-carousel-controls button { min-height: 38px; padding: 7px 13px; border: 1px solid var(--line); border-radius: 6px; background: white; color: var(--navy); font-size: .72rem; font-weight: 700; }
+.teacher-carousel-controls button:hover { border-color: #b8c9e4; background: #f4f7fc; }
 .page .teacher-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
 .home-page .contact-band { margin-bottom: 20px; border-radius: 12px; background: #173f96; }
 
@@ -168,6 +179,7 @@
     .home-updates-grid, .home-program-grid, .listing-layout { grid-template-columns: 1fr; }
     .home-information { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
     .page .teacher-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .teacher-carousel-track { grid-auto-columns: clamp(250px, 42%, 330px); }
     .home-information-block + .home-information-block { border-top: 0; border-left: 1px solid var(--line); }
     .home-program-aside { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -218,6 +230,7 @@
 }
 
 @media (max-width: 700px) {
+    .teacher-carousel-track { grid-auto-columns: min(78vw, 320px); gap: 14px; }
     .home-principal.has-principal-photo { grid-template-columns: 1fr; gap: 0; padding: 28px 25px 0; }
     .home-principal.has-principal-photo .home-principal-copy { grid-column: 1; grid-row: 1; padding-bottom: 20px; }
     .home-principal-portrait { grid-column: 1; grid-row: 2; width: min(100%, 360px); height: min(var(--principal-photo-height, 300px), 340px); margin-inline: auto; }
@@ -225,6 +238,7 @@
 
 @media (prefers-reduced-motion: reduce) {
     .home-shortcuts>a { transition: none; }
+    .teacher-carousel-track { scroll-behavior: auto; }
 }
 
 .nav-more .nav-more-panel>a {
