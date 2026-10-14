@@ -5,7 +5,13 @@
     <div><span class="eyebrow">WEBSITE</span><h1>Susunan & tampilan</h1><p>Atur identitas visual dan susunan beranda. Menu dan tautan dikelola pada halaman tersendiri.</p></div>
     <a class="button outline" href="{{ route('home') }}" target="_blank" rel="noopener">Lihat beranda</a>
 </header>
-<form class="appearance-form" method="post" enctype="multipart/form-data" action="{{ route('manage.appearance.update') }}">
+<nav class="manage-section-nav" aria-label="Bagian pengaturan tampilan">
+    <a href="#identity-title">Logo</a>
+    <a href="#hero-settings-title">Hero & tombol</a>
+    <a href="#section-settings-title">Bagian beranda</a>
+    <a href="#theme-settings-title">Warna & bentuk</a>
+</nav>
+<form id="appearance-form" class="appearance-form" method="post" enctype="multipart/form-data" action="{{ route('manage.appearance.update') }}">
     @csrf @method('PUT')
     <section class="panel appearance-panel" aria-labelledby="identity-title">
         <div class="appearance-heading"><span class="eyebrow">01 / IDENTITAS</span><h2 id="identity-title">Logo sekolah</h2><p>Logo tampil di bagian atas website. Gunakan berkas dengan latar transparan agar terlihat rapi.</p></div>

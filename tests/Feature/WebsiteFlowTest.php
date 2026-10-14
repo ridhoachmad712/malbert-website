@@ -14,6 +14,15 @@ class WebsiteFlowTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_admin_management_pages_render_with_main_navigation(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        foreach (['manage.dashboard', 'manage.posts', 'manage.teachers', 'manage.profile', 'manage.users'] as $routeName) {
+            $this->actingAs($admin)->get(route($routeName))->assertOk()->assertSee('Jenis konten')->assertSee('Lihat situs');
+        }
+    }
+
     public function test_public_pages_render_without_school_data(): void
     {
         foreach (['/', '/profil', '/guru', '/berita', '/pengumuman', '/galeri', '/kontak', '/masuk'] as $path) {

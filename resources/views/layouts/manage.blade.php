@@ -1,10 +1,67 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>@yield('title', 'Ruang pengelola') · {{ $school->name }}</title><link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml"><link rel="stylesheet" href="{{ asset('css/school.css') }}"><link rel="stylesheet" href="{{ asset('css/school-manage.css') }}"></head>
-<body class="manage-body"><a class="skip" href="#main">Lewati ke isi utama</a><header class="manage-header"><a class="manage-brand" href="{{ route('manage.dashboard') }}" aria-label="Dasbor pengelola">@if($school->logo_path)<img src="{{ asset('storage/'.$school->logo_path) }}" alt="" class="brand-logo">@else<span class="brand-mark" aria-hidden="true">✳</span>@endif<span><strong>{{ $school->name }}</strong><small>Ruang pengelola website</small></span></a><div class="manage-header-actions"><a class="manage-site-link" href="{{ route('home') }}" target="_blank" rel="noopener">Lihat situs</a><details class="manage-account"><summary aria-label="Akun {{ auth()->user()->name }}"><span class="manage-account-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span><span class="manage-account-copy"><strong>{{ auth()->user()->name }}</strong><small>{{ ['admin'=>'Administrator','editor'=>'Penerbit','writer'=>'Penulis'][auth()->user()->role] ?? 'Pengelola' }}</small></span></summary><div class="manage-account-panel"><div class="manage-account-panel-identity"><strong>{{ auth()->user()->name }}</strong><small>{{ ['admin'=>'Administrator','editor'=>'Penerbit','writer'=>'Penulis'][auth()->user()->role] ?? 'Pengelola' }}</small></div><a href="{{ route('manage.account') }}">Ubah kata sandi</a><form method="post" action="{{ route('logout') }}">@csrf<button type="submit">Keluar</button></form></div></details><button class="menu-toggle" type="button" aria-label="Menu pengelola" aria-expanded="false" aria-controls="manage-nav"><span class="manage-menu-label">Menu</span><span aria-hidden="true">☰</span></button></div></header>
-<div class="manage-shell"><aside id="manage-nav" class="manage-sidebar"><nav aria-label="Menu pengelolaan">
-<span class="nav-label">RINGKASAN</span><a href="{{ route('manage.dashboard') }}" @class(['active' => request()->routeIs('manage.dashboard')])>Dasbor</a>
-<span class="nav-label">PUBLIKASI</span><a href="{{ route('manage.posts') }}" @class(['active' => request()->routeIs('manage.posts') || request()->routeIs('manage.posts.create')])>Semua konten</a>
-@foreach(['news'=>'Berita','announcement'=>'Pengumuman','event'=>'Agenda','gallery'=>'Galeri','program'=>'Program','facility'=>'Fasilitas','achievement'=>'Prestasi','faq'=>'Tanya jawab'] as $contentType => $label)
-<a href="{{ route('manage.posts.type', $contentType) }}" @class(['active' => request()->route('type') === $contentType || (isset($post) && $post->type === $contentType)])>{{ $label }}</a>
-@endforeach
-@if(auth()->user()->role === 'admin')<span class="nav-label">WEBSITE</span><a href="{{ route('manage.pages') }}" @class(['active' => request()->routeIs('manage.pages*')])>Halaman</a><a href="{{ route('manage.menu') }}" @class(['active' => request()->routeIs('manage.menu*')])>Menu & tautan</a><a href="{{ route('manage.appearance') }}" @class(['active' => request()->routeIs('manage.appearance*')])>Susunan & tampilan</a><span class="nav-label">SEKOLAH</span><a href="{{ route('manage.teachers') }}" @class(['active' => request()->routeIs('manage.teachers*')])>Profil guru</a><a href="{{ route('manage.profile') }}" @class(['active' => request()->routeIs('manage.profile*')])>Profil sekolah</a><a href="{{ route('manage.users') }}" @class(['active' => request()->routeIs('manage.users*')])>Pengguna</a>@endif
-<span class="nav-label">AKUN</span><a href="{{ route('manage.account') }}" @class(['active' => request()->routeIs('manage.account*')])>Kata sandi</a></nav></aside><main id="main" class="manage-main">@if(session('success'))<div class="notice success" role="status">{{ session('success') }}</div>@endif @if($errors->any())<div class="notice error" role="alert"><strong>Periksa kembali isian berikut:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif @yield('content')</main></div><script src="{{ asset('js/school.js') }}" defer></script></body></html>
+<!doctype html>
+<html lang="id">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="robots" content="noindex,nofollow">
+    <title>@yield('title', 'Ruang pengelola') · {{ $school->name }}</title>
+    <link rel="icon" href="{{ asset('favicon.svg') }}" type="image/svg+xml">
+    <link rel="stylesheet" href="{{ asset('css/school.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/school-manage.css') }}">
+</head>
+<body class="manage-body">
+@php($activeContentType = request()->route('type') ?? ($post->type ?? null))
+<a class="skip" href="#main">Lewati ke isi utama</a>
+<header class="manage-header">
+    <a class="manage-brand" href="{{ route('manage.dashboard') }}" aria-label="Dasbor pengelola">
+        @if($school->logo_path)<img src="{{ asset('storage/'.$school->logo_path) }}" alt="" class="brand-logo">@else<span class="brand-mark" aria-hidden="true">✳</span>@endif
+        <span><strong>{{ $school->name }}</strong><small>Ruang pengelola website</small></span>
+    </a>
+    <div class="manage-header-actions">
+        <a class="manage-site-link" href="{{ route('home') }}" target="_blank" rel="noopener noreferrer">Lihat situs</a>
+        <details class="manage-account">
+            <summary aria-label="Akun {{ auth()->user()->name }}"><span class="manage-account-avatar" aria-hidden="true">{{ mb_strtoupper(mb_substr(auth()->user()->name, 0, 1)) }}</span><span class="manage-account-copy"><strong>{{ auth()->user()->name }}</strong><small>{{ ['admin'=>'Administrator','editor'=>'Penerbit','writer'=>'Penulis'][auth()->user()->role] ?? 'Pengelola' }}</small></span></summary>
+            <div class="manage-account-panel"><div class="manage-account-panel-identity"><strong>{{ auth()->user()->name }}</strong><small>{{ ['admin'=>'Administrator','editor'=>'Penerbit','writer'=>'Penulis'][auth()->user()->role] ?? 'Pengelola' }}</small></div><a href="{{ route('manage.account') }}">Ubah kata sandi</a><form method="post" action="{{ route('logout') }}">@csrf<button type="submit">Keluar</button></form></div>
+        </details>
+        <button class="menu-toggle" type="button" aria-label="Menu pengelola" aria-expanded="false" aria-controls="manage-nav"><span class="manage-menu-label">Menu</span><span aria-hidden="true">☰</span></button>
+    </div>
+</header>
+<div class="manage-shell">
+    <aside id="manage-nav" class="manage-sidebar">
+        <nav aria-label="Menu pengelolaan">
+            <span class="nav-label">MULAI</span>
+            <a href="{{ route('manage.dashboard') }}" @class(['active' => request()->routeIs('manage.dashboard')]) @if(request()->routeIs('manage.dashboard'))aria-current="page"@endif>Dasbor</a>
+            <a href="{{ route('manage.posts.create') }}" @class(['manage-nav-create', 'active' => request()->routeIs('manage.posts.create*')])>Buat konten</a>
+            <span class="nav-label">KONTEN</span>
+            <a href="{{ route('manage.posts') }}" @class(['active' => request()->routeIs('manage.posts')])>Semua konten</a>
+            <details class="manage-nav-group" @if($activeContentType) open @endif>
+                <summary>Jenis konten</summary>
+                <div class="manage-nav-children">
+                    @foreach(['news'=>'Berita','announcement'=>'Pengumuman','event'=>'Agenda','gallery'=>'Galeri','program'=>'Program','facility'=>'Fasilitas','achievement'=>'Prestasi','faq'=>'Tanya jawab'] as $contentType => $label)
+                        <a href="{{ route('manage.posts.type', $contentType) }}" @class(['active' => $activeContentType === $contentType]) @if($activeContentType === $contentType)aria-current="page"@endif>{{ $label }}</a>
+                    @endforeach
+                </div>
+            </details>
+            @if(auth()->user()->role === 'admin')
+                <span class="nav-label">WEBSITE</span>
+                <a href="{{ route('manage.pages') }}" @class(['active' => request()->routeIs('manage.pages*')])>Halaman</a>
+                <a href="{{ route('manage.menu') }}" @class(['active' => request()->routeIs('manage.menu*')])>Menu & tautan</a>
+                <a href="{{ route('manage.appearance') }}" @class(['active' => request()->routeIs('manage.appearance*')])>Susunan & tampilan</a>
+                <span class="nav-label">SEKOLAH</span>
+                <a href="{{ route('manage.teachers') }}" @class(['active' => request()->routeIs('manage.teachers*')])>Profil guru</a>
+                <a href="{{ route('manage.profile') }}" @class(['active' => request()->routeIs('manage.profile*')])>Profil sekolah</a>
+                <a href="{{ route('manage.users') }}" @class(['active' => request()->routeIs('manage.users*')])>Pengguna</a>
+            @endif
+            <span class="nav-label">AKUN</span>
+            <a href="{{ route('manage.account') }}" @class(['active' => request()->routeIs('manage.account*')])>Kata sandi</a>
+        </nav>
+    </aside>
+    <main id="main" class="manage-main">
+        @if(session('success'))<div class="notice success" role="status">{{ session('success') }}</div>@endif
+        @if($errors->any())<div class="notice error" role="alert"><strong>Periksa kembali isian berikut:</strong><ul>@foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach</ul></div>@endif
+        @yield('content')
+    </main>
+</div>
+<script src="{{ asset('js/school.js') }}" defer></script>
+</body>
+</html>
