@@ -30,7 +30,7 @@
     </section>
     <section id="kepala-sekolah" class="panel manage-profile-section" aria-labelledby="kepala-title">
         <h2 id="kepala-title">Sambutan kepala sekolah</h2>
-        <p>Isi nama dan sambutan resmi. Foto PNG kepala sekolah akan tampil di sisi kanan hero beranda.</p>
+        <p>Isi nama dan sambutan resmi. Foto PNG kepala sekolah akan tampil di sisi kanan bagian sambutan pada beranda.</p>
         <div class="form-grid">
             <label class="wide">Nama kepala sekolah<input name="principal_name" value="{{ old('principal_name', $school->principal_name) }}" maxlength="180"></label>
             <div class="wide principal-photo-setting">

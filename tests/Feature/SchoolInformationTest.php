@@ -53,34 +53,36 @@ class SchoolInformationTest extends TestCase
         $this->assertSame('Sekolah Pilihan Pengguna', SchoolProfile::current()->fresh()->name);
     }
 
-    public function test_admin_can_show_and_remove_principal_png_in_home_hero(): void
+    public function test_admin_can_show_and_remove_principal_png_in_greeting_section(): void
     {
         Storage::fake('public');
         $admin = User::factory()->create(['role' => 'admin']);
         $school = SchoolProfile::current();
 
-        $this->get('/')->assertDontSee('home-hero-principal');
+        $this->get('/')->assertDontSee('home-principal-portrait');
         $this->actingAs($admin)->put(route('manage.profile.update'), [
             'name' => $school->name,
             'principal_name' => 'Ibu Kepala Sekolah',
+            'principal_greeting' => 'Selamat datang di sekolah kami.',
             'principal_photo' => UploadedFile::fake()->image('kepala-sekolah.png'),
         ])->assertRedirect()->assertSessionHasNoErrors();
 
         $school->refresh();
         Storage::disk('public')->assertExists($school->principal_photo_path);
         $photoPath = $school->principal_photo_path;
-        $this->get('/')->assertOk()->assertSee('home-hero-principal')->assertSee('Ibu Kepala Sekolah');
+        $this->get('/')->assertOk()->assertSee('home-principal-portrait')->assertSee('Ibu Kepala Sekolah')->assertDontSee('home-hero-principal');
 
         $this->actingAs($admin)->put(route('manage.profile.update'), [
             'name' => $school->name,
             'principal_name' => $school->principal_name,
+            'principal_greeting' => $school->principal_greeting,
             'remove_principal_photo' => '1',
         ])->assertRedirect()->assertSessionHasNoErrors();
         Storage::disk('public')->assertMissing($photoPath);
-        $this->get('/')->assertDontSee('home-hero-principal');
+        $this->get('/')->assertDontSee('home-principal-portrait');
     }
 
-    public function test_principal_hero_photo_requires_png(): void
+    public function test_principal_photo_requires_png(): void
     {
         Storage::fake('public');
         $admin = User::factory()->create(['role' => 'admin']);
